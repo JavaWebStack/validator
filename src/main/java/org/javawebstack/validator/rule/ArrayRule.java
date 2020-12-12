@@ -3,17 +3,17 @@ package org.javawebstack.validator.rule;
 import org.javawebstack.graph.GraphElement;
 import org.javawebstack.validator.Validator;
 
-public class StringRule implements ValidationRule {
+public class ArrayRule implements ValidationRule {
 
     private final int min;
     private final int max;
 
-    public StringRule(int min, int max){
+    public ArrayRule(int min, int max){
         this.min = min;
         this.max = max;
     }
 
-    public StringRule(String[] params){
+    public ArrayRule(String[] params){
         int min = 0;
         int max = Integer.MAX_VALUE;
         if(params.length > 0)
@@ -27,12 +27,13 @@ public class StringRule implements ValidationRule {
     public String validate(Validator validator, GraphElement value) {
         if(value == null)
             return null;
-        if(!value.isPrimitive())
-            return "Not a string value";
-        if(value.toString().length() < min)
-            return String.format("Shorter than minimum string length (%d < %d)", value.toString().length(), min);
-        if(value.toString().length() > max)
-            return String.format("Longer than maximum string length (%d > %d)", value.toString().length(), max);
+        if(!value.isArray())
+            return "Not an array";
+        if(value.array().size() < min)
+            return String.format("Shorter than minimum array length (%d < %d)", value.array().size(), min);
+        if(value.array().size() > max)
+            return String.format("Longer than maximum array length (%d > %d)", value.array().size(), max);
         return null;
     }
+
 }

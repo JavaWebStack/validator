@@ -11,6 +11,7 @@ import org.javawebstack.validator.rule.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -22,12 +23,16 @@ public class Validator {
     static {
         registerRuleType("string", StringRule.class);
         registerRuleType("boolean", BooleanRule.class);
+        registerRuleType("bool", BooleanRule.class);
         registerRuleType("enum", EnumRule.class);
         registerRuleType("required", RequiredRule.class);
+        registerRuleType("req", RequiredRule.class);
         registerRuleType("ipv4", IPv4AddressRule.class);
         registerRuleType("ipv6", IPv6AddressRule.class);
+        registerRuleType("int", IntegerRule.class);
         registerRuleType("integer", IntegerRule.class);
-        registerRuleType("timestamp", TimestampRule.class);
+        registerRuleType("date", DateRule.class);
+        registerRuleType("array", ArrayRule.class);
     }
 
     public static void registerRuleType(String name, Class<? extends ValidationRule> type){
@@ -219,8 +224,12 @@ public class Validator {
             return rules;
         if(type.equals(String.class))
             return rules;
-        if(type.equals(Timestamp.class) || type.equals(Date.class)){
-            rules.put(new String[0], Collections.singletonList(new TimestampRule()));
+        if(type.equals(Timestamp.class) || type.equals(java.util.Date.class)){
+            rules.put(new String[0], Collections.singletonList(new DateRule(new String[]{})));
+            return rules;
+        }
+        if(type.equals(Date.class)){
+            rules.put(new String[0], Collections.singletonList(new DateRule(new String[]{"date"})));
             return rules;
         }
         if(type.equals(Boolean.class)){
