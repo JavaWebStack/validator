@@ -33,6 +33,7 @@ public class Validator {
         registerRuleType("integer", IntegerRule.class);
         registerRuleType("date", DateRule.class);
         registerRuleType("array", ArrayRule.class);
+        registerRuleType("list", ArrayRule.class);
     }
 
     public static void registerRuleType(String name, Class<? extends ValidationRule> type){
