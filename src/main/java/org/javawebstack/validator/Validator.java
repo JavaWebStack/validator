@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import org.javawebstack.graph.GraphArray;
 import org.javawebstack.graph.GraphElement;
 import org.javawebstack.graph.GraphMapper;
+import org.javawebstack.graph.GraphNull;
 import org.javawebstack.validator.rule.*;
 
 import java.lang.reflect.Constructor;
@@ -128,54 +129,88 @@ public class Validator {
 
     public ValidationResult validate(GraphElement rootElement){
         Map<String[], List<String>> errors = new HashMap<>();
-        for(String[] sourceKey : rules.keySet()){
-            Map<String[], GraphElement> map = matchKeys(sourceKey, rootElement);
-            List<ValidationRule> validators = rules.get(sourceKey);
-            map.forEach((key, value) -> {
-                List<String> fieldErrors = new ArrayList<>();
-                for(ValidationRule rule : validators){
-                    String error = rule.validate(this, value);
-                    if(error != null)
-                        fieldErrors.add(error);
-                }
-                if(fieldErrors.size() > 0)
-                    errors.put(key, fieldErrors);
-            });
+        for(String[] key : rules.keySet()){
+            errors.putAll(check(rules, new String[0], new String[0], key, rootElement));
         }
         return new ValidationResult(errors);
     }
 
-    private Map<String[], GraphElement> matchKeys(String[] keys, GraphElement element){
-        Map<String[], GraphElement> result = new HashMap<>();
-        if(keys.length == 0){
-            result.put(keys, element);
-            return result;
+    private Map<String[], List<String>> check(Map<String[], List<ValidationRule>> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, GraphElement element){
+        if(key.length == 0){
+            Map<String[], List<String>> errors = new HashMap<>();
+            for(ValidationRule rule : getMapValue(rules, keyPrefix)){
+                String error = rule.validate(this, element);
+                if(error != null){
+                    if(!errors.containsKey(resolvedKeyPrefix))
+                        errors.put(resolvedKeyPrefix, new ArrayList<>());
+                    errors.get(resolvedKeyPrefix).add(error);
+                }
+            }
+            return errors;
         }
-        if(element.isArray())
-            element = element.object();
+        if(element == null)
+            element = GraphNull.INSTANCE;
+        String[] innerKey = new String[key.length-1];
+        System.arraycopy(key, 1, innerKey, 0, innerKey.length);
+        String[] innerKeyPrefix = new String[keyPrefix.length+1];
+        System.arraycopy(keyPrefix, 0, innerKeyPrefix, 0, keyPrefix.length);
+        innerKeyPrefix[innerKeyPrefix.length-1] = key[0];
+        if(key[0].equals("*")){
+            Map<String[], List<String>> errors = new HashMap<>();
+            if(element.isArray()){
+                for(int i=0; i<element.array().size(); i++){
+                    String[] innerResolvedKeyPrefix = new String[keyPrefix.length+1];
+                    System.arraycopy(resolvedKeyPrefix, 0, innerResolvedKeyPrefix, 0, resolvedKeyPrefix.length);
+                    innerResolvedKeyPrefix[innerResolvedKeyPrefix.length-1] = String.valueOf(i);
+                    errors.putAll(check(rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, element.array().get(i)));
+                }
+            }
+            if(element.isObject()){
+                for(String k : element.object().keys()){
+                    String[] innerResolvedKeyPrefix = new String[keyPrefix.length+1];
+                    System.arraycopy(resolvedKeyPrefix, 0, innerResolvedKeyPrefix, 0, resolvedKeyPrefix.length);
+                    innerResolvedKeyPrefix[innerResolvedKeyPrefix.length-1] = k;
+                    errors.putAll(check(rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, element.object().get(k)));
+                }
+            }
+            return errors;
+        }
+        GraphElement value = GraphNull.INSTANCE;
+        if(element.isArray()){
+            try {
+                value = element.array().get(Integer.parseInt(key[0]));
+            }catch (Exception ignored){}
+        }
         if(element.isObject()){
-            String currentKey = keys[0];
-            String[] newKeys = new String[keys.length-1];
-            System.arraycopy(keys, 1, newKeys, 0, newKeys.length);
-            if(currentKey != null){
-                matchKeys(newKeys, element.object().get(currentKey)).forEach((nk, actualValue) -> {
-                    String[] actualKey = new String[nk.length + 1];
-                    actualKey[0] = currentKey;
-                    System.arraycopy(nk, 0, actualKey, 1, nk.length);
-                    result.put(actualKey, actualValue);
-                });
-            }else{
-                element.object().forEach((k, value) -> {
-                    matchKeys(newKeys, value).forEach((nk, actualValue) -> {
-                        String[] actualKey = new String[nk.length + 1];
-                        actualKey[0] = k;
-                        System.arraycopy(nk, 0, actualKey, 1, nk.length);
-                        result.put(actualKey, actualValue);
-                    });
-                });
+            value = element.object().get(key[0]);
+        }
+        String[] innerResolvedKeyPrefix = new String[keyPrefix.length+1];
+        System.arraycopy(resolvedKeyPrefix, 0, innerResolvedKeyPrefix, 0, resolvedKeyPrefix.length);
+        innerResolvedKeyPrefix[innerResolvedKeyPrefix.length-1] = key[0];
+        return check(rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, value);
+    }
+
+    private static boolean stringArrayEqual(String[] a, String[] b){
+        if(a.length != b.length)
+            return false;
+        for(int i=0; i<a.length; i++){
+            if(a[0] == null && b[0] == null)
+                continue;
+            if(a[0] == null || b[0] == null)
+                return false;
+            if(!a[0].equals(b[0]))
+                return false;
+        }
+        return true;
+    }
+
+    private static <V> V getMapValue(Map<String[], V> map, String[] key){
+        for(String[] k : map.keySet()){
+            if(stringArrayEqual(k, key)){
+                return map.get(k);
             }
         }
-        return result;
+        return null;
     }
 
     private static Map<String[], List<ValidationRule>> getClassRules(Class<?> type){
