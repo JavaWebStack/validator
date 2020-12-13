@@ -247,7 +247,11 @@ public class Validator {
             return rules;
         }
         if(type.equals(Integer.class)){
-            rules.put(new String[0], Collections.singletonList(new IntegerRule()));
+            rules.put(new String[0], Collections.singletonList(new IntegerRule(Integer.MIN_VALUE, Integer.MAX_VALUE)));
+            return rules;
+        }
+        if(type.equals(UUID.class)){
+            rules.put(new String[0], Collections.singletonList(new UUIDRule()));
             return rules;
         }
         if(type.isEnum()){
