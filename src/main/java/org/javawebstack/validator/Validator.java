@@ -1,7 +1,9 @@
 package org.javawebstack.validator;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.annotations.SerializedName;
 import org.javawebstack.graph.GraphArray;
 import org.javawebstack.graph.GraphElement;
 import org.javawebstack.graph.GraphMapper;
@@ -255,7 +257,7 @@ public class Validator {
             return rules;
         }
         for(Field field : getFieldsRecursive(type)){
-            String name = field.getName();
+            String name = FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES.translateName(field);
             getClassRules(field.getType()).forEach((key, validators) -> {
                 String[] actualKey = new String[key.length+1];
                 actualKey[0] = name;
