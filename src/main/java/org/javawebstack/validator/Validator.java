@@ -221,11 +221,26 @@ public class Validator {
         return null;
     }
 
+    private static String toSnakeCase(String source){
+        StringBuilder sb = new StringBuilder();
+        sb.append(Character.toLowerCase(source.charAt(0)));
+        for(int i=1; i<source.length(); i++){
+            if(Character.isUpperCase(source.charAt(i))){
+                if(!Character.isUpperCase(source.charAt(i-1)))
+                    sb.append("_");
+                sb.append(Character.toLowerCase(source.charAt(i)));
+            }else{
+                sb.append(source.charAt(i));
+            }
+        }
+        return sb.toString();
+    }
+
     private static String getFieldName(Field field){
         SerializedName[] serializedNames = field.getAnnotationsByType(SerializedName.class);
         if(serializedNames.length > 0)
             return serializedNames[0].value();
-        return field.getName();
+        return toSnakeCase(field.getName());
     }
 
     private static Map<String[], List<ValidationRule>> getClassRules(Class<?> type){
