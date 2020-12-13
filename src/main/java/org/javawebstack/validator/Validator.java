@@ -221,6 +221,13 @@ public class Validator {
         return null;
     }
 
+    private static String getFieldName(Field field){
+        SerializedName[] serializedNames = field.getAnnotationsByType(SerializedName.class);
+        if(serializedNames.length > 0)
+            return serializedNames[0].value();
+        return field.getName();
+    }
+
     private static Map<String[], List<ValidationRule>> getClassRules(Class<?> type){
         Map<String[], List<ValidationRule>> rules = new HashMap<>();
         if(type.isAnnotation())
@@ -257,7 +264,7 @@ public class Validator {
             return rules;
         }
         for(Field field : getFieldsRecursive(type)){
-            String name = FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES.translateName(field);
+            String name = getFieldName(field);
             getClassRules(field.getType()).forEach((key, validators) -> {
                 String[] actualKey = new String[key.length+1];
                 actualKey[0] = name;
