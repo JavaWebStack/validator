@@ -149,6 +149,8 @@ public class Validator {
             for(ValidationRule rule : getMapValue(rules, keyPrefix)){
                 String error = rule.validate(this, element);
                 if(error != null){
+                    //System.out.println(String.join(".", resolvedKeyPrefix));
+                    //System.out.println(rule.toString());
                     if(!errors.containsKey(resolvedKeyPrefix))
                         errors.put(resolvedKeyPrefix, new ArrayList<>());
                     errors.get(resolvedKeyPrefix).add(error);

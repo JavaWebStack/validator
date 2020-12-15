@@ -57,4 +57,13 @@ public class IntegerRule implements ValidationRule {
             return String.format("Not in steps of %d", step);
         return null;
     }
+
+    public String toString() {
+        return "IntegerRule{" +
+                "min=" + min +
+                ", max=" + max +
+                ", step=" + step +
+                '}';
+    }
+
 }
