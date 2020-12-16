@@ -1,6 +1,5 @@
 package org.javawebstack.validator;
 
-import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.annotations.SerializedName;
@@ -149,8 +148,6 @@ public class Validator {
             for(ValidationRule rule : getMapValue(rules, keyPrefix)){
                 String error = rule.validate(this, element);
                 if(error != null){
-                    //System.out.println(String.join(".", resolvedKeyPrefix));
-                    //System.out.println(rule.toString());
                     if(!errors.containsKey(resolvedKeyPrefix))
                         errors.put(resolvedKeyPrefix, new ArrayList<>());
                     errors.get(resolvedKeyPrefix).add(error);
@@ -204,11 +201,11 @@ public class Validator {
         if(a.length != b.length)
             return false;
         for(int i=0; i<a.length; i++){
-            if(a[0] == null && b[0] == null)
+            if(a[i] == null && b[i] == null)
                 continue;
-            if(a[0] == null || b[0] == null)
+            if(a[i] == null || b[i] == null)
                 return false;
-            if(!a[0].equals(b[0]))
+            if(!a[i].equals(b[i]))
                 return false;
         }
         return true;
@@ -221,6 +218,24 @@ public class Validator {
             }
         }
         return null;
+    }
+
+    private static <V> void putMapValue(Map<String[], Object> map, String[] key, Object value){
+        for(String[] k : map.keySet()){
+            if(stringArrayEqual(k, key)){
+                map.put(k, value);
+                return;
+            }
+        }
+        map.put(key, value);
+    }
+
+    private static <V> void addMapListEntryValue(Map map, String[] key, List values){
+        List<Object> list = (List<Object>) getMapValue(map, key);
+        if(list == null)
+            list = new ArrayList<>();
+        list.addAll(values);
+        putMapValue(map, key, list);
     }
 
     private static String toSnakeCase(String source){
@@ -280,7 +295,7 @@ public class Validator {
                 String[] actualKey = new String[key.length+1];
                 actualKey[0] = "*";
                 System.arraycopy(key, 0, actualKey, 1, key.length);
-                rules.put(actualKey, validators);
+                addMapListEntryValue(rules, actualKey, validators);
             });
             return rules;
         }
@@ -290,7 +305,7 @@ public class Validator {
                 String[] actualKey = new String[key.length+1];
                 actualKey[0] = name;
                 System.arraycopy(key, 0, actualKey, 1, key.length);
-                rules.put(actualKey, validators);
+                addMapListEntryValue(rules, actualKey, validators);
             });
             field.setAccessible(true);
             Rule[] ruleAnnotations = field.getDeclaredAnnotationsByType(Rule.class);
@@ -302,7 +317,7 @@ public class Validator {
                         r.add(rule);
                 }
                 if(r.size() > 0)
-                    rules.put(new String[]{name}, r);
+                    addMapListEntryValue(rules, new String[]{name}, r);
             }
         }
         return rules;

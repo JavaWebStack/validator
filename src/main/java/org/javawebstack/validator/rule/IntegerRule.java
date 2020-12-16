@@ -53,7 +53,7 @@ public class IntegerRule implements ValidationRule {
             return String.format("Smaller than the minimum value (%d < %d)", v, min);
         if(v > max)
             return String.format("Greater than the maximum value (%d > %d)", v, max);
-        if(step > 1 && v-min % step != 0)
+        if(step > 1 && (v-min) % step != 0)
             return String.format("Not in steps of %d", step);
         return null;
     }
