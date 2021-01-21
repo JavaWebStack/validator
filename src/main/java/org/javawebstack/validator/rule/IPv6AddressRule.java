@@ -1,6 +1,6 @@
 package org.javawebstack.validator.rule;
 
-import org.javawebstack.graph.GraphElement;
+import org.javawebstack.abstractdata.AbstractElement;
 import org.javawebstack.validator.Validator;
 
 public class IPv6AddressRule extends RegexRule {
@@ -8,7 +8,7 @@ public class IPv6AddressRule extends RegexRule {
         super("([0-9a-fA-F]{1,4})(:(?1)){7}");
     }
 
-    public String validate(Validator validator, GraphElement value) {
+    public String validate(Validator validator, AbstractElement value) {
         return super.validate(validator, value) == null ? null : "Not a valid IPv6 Address";
     }
 }

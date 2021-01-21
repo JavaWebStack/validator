@@ -1,6 +1,6 @@
 package org.javawebstack.validator.rule;
 
-import org.javawebstack.graph.GraphElement;
+import org.javawebstack.abstractdata.AbstractElement;
 import org.javawebstack.validator.Validator;
 
 public class IntegerRule implements ValidationRule {
@@ -34,7 +34,7 @@ public class IntegerRule implements ValidationRule {
         this.step = step;
     }
 
-    public String validate(Validator validator, GraphElement value) {
+    public String validate(Validator validator, AbstractElement value) {
         if(value == null)
             return null;
         int v;

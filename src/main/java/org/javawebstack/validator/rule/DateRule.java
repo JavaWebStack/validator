@@ -1,7 +1,7 @@
 package org.javawebstack.validator.rule;
 
-import org.javawebstack.graph.GraphElement;
-import org.javawebstack.graph.GraphMapper;
+import org.javawebstack.abstractdata.AbstractElement;
+import org.javawebstack.abstractdata.AbstractMapper;
 import org.javawebstack.validator.Validator;
 
 import java.text.DateFormat;
@@ -28,7 +28,7 @@ public class DateRule implements ValidationRule {
         }
     }
 
-    public String validate(Validator validator, GraphElement value) {
+    public String validate(Validator validator, AbstractElement value) {
 
         return null;
     }

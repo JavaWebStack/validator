@@ -3,10 +3,10 @@ package org.javawebstack.validator;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.annotations.SerializedName;
-import org.javawebstack.graph.GraphArray;
-import org.javawebstack.graph.GraphElement;
-import org.javawebstack.graph.GraphMapper;
-import org.javawebstack.graph.GraphNull;
+import org.javawebstack.abstractdata.AbstractArray;
+import org.javawebstack.abstractdata.AbstractElement;
+import org.javawebstack.abstractdata.AbstractMapper;
+import org.javawebstack.abstractdata.AbstractNull;
 import org.javawebstack.validator.rule.*;
 
 import java.lang.reflect.Constructor;
@@ -74,7 +74,7 @@ public class Validator {
             source = spl[0];
             String s = spl[1];
             s = s.substring(0, s.length()-1);
-            GraphArray array = GraphArray.fromJson(new Gson().fromJson("["+s+"]", JsonArray.class));
+            AbstractArray array = AbstractArray.fromJson(new Gson().fromJson("["+s+"]", JsonArray.class));
             if(array.stream().filter(e -> e.isPrimitive()).count() == array.size()){
                 params = new String[array.size()];
                 for(int i=0; i<params.length; i++)
@@ -103,16 +103,16 @@ public class Validator {
         return validator;
     }
 
-    public static <T> T map(Class<T> type, GraphElement element, GraphMapper mapper){
+    public static <T> T map(Class<T> type, AbstractElement element, AbstractMapper mapper){
         Validator validator = getValidator(type);
         ValidationResult result = validator.validate(element);
         if(!result.isValid())
             throw new ValidationException(result);
-        return mapper.fromGraph(element, type);
+        return mapper.fromAbstract(element, type);
     }
 
-    public static <T> T map(Class<T> type, GraphElement element){
-        return map(type, element, new GraphMapper());
+    public static <T> T map(Class<T> type, AbstractElement element){
+        return map(type, element, new AbstractMapper());
     }
 
     private final Map<String[], List<ValidationRule>> rules = new HashMap<>();
@@ -134,7 +134,7 @@ public class Validator {
         return rule(key, Arrays.asList(rules));
     }
 
-    public ValidationResult validate(GraphElement rootElement){
+    public ValidationResult validate(AbstractElement rootElement){
         Map<String[], List<String>> errors = new HashMap<>();
         for(String[] key : rules.keySet()){
             errors.putAll(check(rules, new String[0], new String[0], key, rootElement));
@@ -142,7 +142,7 @@ public class Validator {
         return new ValidationResult(errors);
     }
 
-    private Map<String[], List<String>> check(Map<String[], List<ValidationRule>> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, GraphElement element){
+    private Map<String[], List<String>> check(Map<String[], List<ValidationRule>> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, AbstractElement element){
         if(key.length == 0){
             Map<String[], List<String>> errors = new HashMap<>();
             for(ValidationRule rule : getMapValue(rules, keyPrefix)){
@@ -156,7 +156,7 @@ public class Validator {
             return errors;
         }
         if(element == null)
-            element = GraphNull.INSTANCE;
+            element = AbstractNull.INSTANCE;
         String[] innerKey = new String[key.length-1];
         System.arraycopy(key, 1, innerKey, 0, innerKey.length);
         String[] innerKeyPrefix = new String[keyPrefix.length+1];
@@ -182,7 +182,7 @@ public class Validator {
             }
             return errors;
         }
-        GraphElement value = GraphNull.INSTANCE;
+        AbstractElement value = AbstractNull.INSTANCE;
         if(element.isArray()){
             try {
                 value = element.array().get(Integer.parseInt(key[0]));

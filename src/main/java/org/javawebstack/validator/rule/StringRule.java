@@ -1,6 +1,6 @@
 package org.javawebstack.validator.rule;
 
-import org.javawebstack.graph.GraphElement;
+import org.javawebstack.abstractdata.AbstractElement;
 import org.javawebstack.validator.Validator;
 
 public class StringRule implements ValidationRule {
@@ -24,7 +24,7 @@ public class StringRule implements ValidationRule {
         this.max = max;
     }
 
-    public String validate(Validator validator, GraphElement value) {
+    public String validate(Validator validator, AbstractElement value) {
         if(value == null)
             return null;
         if(!value.isPrimitive())

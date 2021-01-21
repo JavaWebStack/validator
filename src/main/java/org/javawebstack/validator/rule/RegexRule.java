@@ -1,6 +1,6 @@
 package org.javawebstack.validator.rule;
 
-import org.javawebstack.graph.GraphElement;
+import org.javawebstack.abstractdata.AbstractElement;
 import org.javawebstack.validator.Validator;
 
 import java.util.regex.Pattern;
@@ -12,7 +12,7 @@ public class RegexRule implements ValidationRule {
         this.regex = regex;
         this.pattern = Pattern.compile(regex);
     }
-    public String validate(Validator validator, GraphElement value) {
+    public String validate(Validator validator, AbstractElement value) {
         if(value == null)
             return null;
         return value.isString() && pattern.matcher(value.string()).matches() ? null : "Doesn't match the expected pattern";
