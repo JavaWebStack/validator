@@ -3,6 +3,7 @@ package org.javawebstack.validator.rule;
 import org.javawebstack.abstractdata.AbstractElement;
 import org.javawebstack.validator.Validator;
 
+import java.lang.reflect.Field;
 import java.util.regex.Pattern;
 
 public class RegexRule implements ValidationRule {
@@ -12,7 +13,7 @@ public class RegexRule implements ValidationRule {
         this.regex = regex;
         this.pattern = Pattern.compile(regex);
     }
-    public String validate(Validator validator, AbstractElement value) {
+    public String validate(Validator validator, Field field, AbstractElement value) {
         if(value == null)
             return null;
         return value.isString() && pattern.matcher(value.string()).matches() ? null : "Doesn't match the expected pattern";

@@ -97,7 +97,7 @@ public class Validator {
         Validator validator = validators.get(type);
         if(validator == null){
             validator = new Validator();
-            getClassRules(type).forEach(validator::rule);
+            getClassRules(null, type).forEach(validator::rule);
             validators.put(type, validator);
         }
         return validator;
@@ -115,14 +115,19 @@ public class Validator {
         return map(type, element, new AbstractMapper());
     }
 
-    private final Map<String[], List<ValidationRule>> rules = new HashMap<>();
+    private final Map<String[], ValidationConfig> rules = new HashMap<>();
 
     public Validator rule(String[] key, ValidationRule... rules){
         return rule(key, Arrays.asList(rules));
     }
 
     public Validator rule(String[] key, List<ValidationRule> rules){
-        this.rules.put(key, rules);
+        this.rules.put(key, new ValidationConfig(null, rules));
+        return this;
+    }
+
+    private Validator rule(String[] key, ValidationConfig config){
+        this.rules.put(key, config);
         return this;
     }
 
@@ -142,11 +147,12 @@ public class Validator {
         return new ValidationResult(errors);
     }
 
-    private Map<String[], List<String>> check(Map<String[], List<ValidationRule>> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, AbstractElement element){
+    private Map<String[], List<String>> check(Map<String[], ValidationConfig> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, AbstractElement element){
         if(key.length == 0){
             Map<String[], List<String>> errors = new HashMap<>();
-            for(ValidationRule rule : getMapValue(rules, keyPrefix)){
-                String error = rule.validate(this, element);
+            ValidationConfig config = getMapValue(rules, keyPrefix);
+            for(ValidationRule rule : config.rules){
+                String error = rule.validate(this, config.field, element);
                 if(error != null){
                     if(!errors.containsKey(resolvedKeyPrefix))
                         errors.put(resolvedKeyPrefix, new ArrayList<>());
@@ -220,7 +226,7 @@ public class Validator {
         return null;
     }
 
-    private static <V> void putMapValue(Map<String[], Object> map, String[] key, Object value){
+    private static <V> void putValidationConfigMapValue(Map<String[], ValidationConfig> map, String[] key, ValidationConfig value) {
         for(String[] k : map.keySet()){
             if(stringArrayEqual(k, key)){
                 map.put(k, value);
@@ -230,12 +236,12 @@ public class Validator {
         map.put(key, value);
     }
 
-    private static <V> void addMapListEntryValue(Map map, String[] key, List values){
-        List<Object> list = (List<Object>) getMapValue(map, key);
-        if(list == null)
-            list = new ArrayList<>();
-        list.addAll(values);
-        putMapValue(map, key, list);
+    private static void addMapRules(Field field, Map<String[], ValidationConfig> map, String[] key, List<ValidationRule> rules) {
+        ValidationConfig config = getMapValue(map, key);
+        if(config == null)
+            config = new ValidationConfig(field, new ArrayList<>());
+        config.rules.addAll(rules);
+        putValidationConfigMapValue(map, key, config);
     }
 
     private static String toSnakeCase(String source){
@@ -260,55 +266,64 @@ public class Validator {
         return toSnakeCase(field.getName());
     }
 
-    private static Map<String[], List<ValidationRule>> getClassRules(Class<?> type){
-        Map<String[], List<ValidationRule>> rules = new HashMap<>();
+    private static class ValidationConfig {
+        private final Field field;
+        private final List<ValidationRule> rules;
+        public ValidationConfig(Field field, List<ValidationRule> rules) {
+            this.field = field;
+            this.rules = rules;
+        }
+    }
+
+    private static Map<String[], ValidationConfig> getClassRules(Field field, Class<?> type){
+        Map<String[], ValidationConfig> rules = new HashMap<>();
         if(type.isAnnotation())
             return rules;
         if(type.equals(String.class))
             return rules;
         if(type.equals(Timestamp.class) || type.equals(java.util.Date.class)){
-            rules.put(new String[0], Collections.singletonList(new DateRule(new String[]{})));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DateRule(new String[]{}))));
             return rules;
         }
         if(type.equals(Date.class)){
-            rules.put(new String[0], Collections.singletonList(new DateRule(new String[]{"date"})));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DateRule(new String[]{"date"}))));
             return rules;
         }
         if(type.equals(Boolean.class)){
-            rules.put(new String[0], Collections.singletonList(new BooleanRule()));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new BooleanRule())));
             return rules;
         }
         if(type.equals(Integer.class)){
-            rules.put(new String[0], Collections.singletonList(new IntegerRule(Integer.MIN_VALUE, Integer.MAX_VALUE)));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new IntegerRule(Integer.MIN_VALUE, Integer.MAX_VALUE))));
             return rules;
         }
         if(type.equals(UUID.class)){
-            rules.put(new String[0], Collections.singletonList(new UUIDRule()));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new UUIDRule())));
             return rules;
         }
         if(type.isEnum()){
-            rules.put(new String[0], Collections.singletonList(new EnumRule((Class<? extends Enum<?>>) type)));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new EnumRule((Class<? extends Enum<?>>) type))));
             return rules;
         }
         if(type.isArray()){
-            getClassRules(type.getComponentType()).forEach((key, validators) -> {
+            getClassRules(null, type.getComponentType()).forEach((key, validators) -> {
                 String[] actualKey = new String[key.length+1];
                 actualKey[0] = "*";
                 System.arraycopy(key, 0, actualKey, 1, key.length);
-                addMapListEntryValue(rules, actualKey, validators);
+                addMapRules(null, rules, actualKey, validators.rules);
             });
             return rules;
         }
-        for(Field field : getFieldsRecursive(type)){
-            String name = getFieldName(field);
-            getClassRules(field.getType()).forEach((key, validators) -> {
+        for(Field f : getFieldsRecursive(type)){
+            String name = getFieldName(f);
+            getClassRules(f, f.getType()).forEach((key, validators) -> {
                 String[] actualKey = new String[key.length+1];
                 actualKey[0] = name;
                 System.arraycopy(key, 0, actualKey, 1, key.length);
-                addMapListEntryValue(rules, actualKey, validators);
+                addMapRules(f, rules, actualKey, validators.rules);
             });
-            field.setAccessible(true);
-            Rule[] ruleAnnotations = field.getDeclaredAnnotationsByType(Rule.class);
+            f.setAccessible(true);
+            Rule[] ruleAnnotations = f.getDeclaredAnnotationsByType(Rule.class);
             if(ruleAnnotations.length > 0){
                 List<ValidationRule> r = new ArrayList<>();
                 for(String source : ruleAnnotations[0].value()){
@@ -317,7 +332,7 @@ public class Validator {
                         r.add(rule);
                 }
                 if(r.size() > 0)
-                    addMapListEntryValue(rules, new String[]{name}, r);
+                    addMapRules(f, rules, new String[]{name}, r);
             }
         }
         return rules;

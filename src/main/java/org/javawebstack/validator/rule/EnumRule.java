@@ -3,6 +3,7 @@ package org.javawebstack.validator.rule;
 import org.javawebstack.abstractdata.AbstractElement;
 import org.javawebstack.validator.Validator;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +19,7 @@ public class EnumRule implements ValidationRule {
     public EnumRule(Class<? extends Enum<?>> enumType){
         this(Arrays.stream(enumType.getEnumConstants()).map(Enum::name).collect(Collectors.toList()));
     }
-    public String validate(Validator validator, AbstractElement value) {
+    public String validate(Validator validator, Field field, AbstractElement value) {
         if(value == null)
             return null;
         return value.isString() && values.contains(value.string()) ? null : String.format("Not an element of [%s]", String.join(",", values));
