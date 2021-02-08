@@ -32,9 +32,14 @@ public class Validator {
         registerRuleType("ipv6", IPv6AddressRule.class);
         registerRuleType("int", IntegerRule.class);
         registerRuleType("integer", IntegerRule.class);
+        registerRuleType("numeric", NumericRule.class);
         registerRuleType("date", DateRule.class);
         registerRuleType("array", ArrayRule.class);
         registerRuleType("list", ArrayRule.class);
+        registerRuleType("alpha", AlphaRule.class);
+        registerRuleType("alpha_num", AlphaNumRule.class);
+        registerRuleType("alpha_dash", AlphaDashRule.class);
+        registerRuleType("email", EmailRule.class);
     }
 
     public static void registerRuleType(String name, Class<? extends ValidationRule> type) {
