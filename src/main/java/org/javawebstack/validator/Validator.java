@@ -32,6 +32,7 @@ public class Validator {
         registerRuleType("ipv6", IPv6AddressRule.class);
         registerRuleType("int", IntegerRule.class);
         registerRuleType("integer", IntegerRule.class);
+        registerRuleType("numeric", NumericRule.class);
         registerRuleType("date", DateRule.class);
         registerRuleType("array", ArrayRule.class);
         registerRuleType("list", ArrayRule.class);
