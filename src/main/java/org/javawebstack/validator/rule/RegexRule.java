@@ -9,12 +9,14 @@ import java.util.regex.Pattern;
 public class RegexRule implements ValidationRule {
     private final String regex;
     private final Pattern pattern;
-    public RegexRule(String regex){
+
+    public RegexRule(String regex) {
         this.regex = regex;
         this.pattern = Pattern.compile(regex);
     }
+
     public String validate(ValidationContext context, Field field, AbstractElement value) {
-        if(value == null)
+        if (value == null)
             return null;
         return value.isString() && pattern.matcher(value.string()).matches() ? null : "Doesn't match the expected pattern";
     }
