@@ -103,16 +103,16 @@ public class Validator {
         return validator;
     }
 
-    public static <T> T map(Class<T> type, AbstractElement element, AbstractMapper mapper){
+    public static <T> T map(ValidationContext context, Class<T> type, AbstractElement element, AbstractMapper mapper){
         Validator validator = getValidator(type);
-        ValidationResult result = validator.validate(element);
+        ValidationResult result = validator.validate(context, element);
         if(!result.isValid())
             throw new ValidationException(result);
         return mapper.fromAbstract(element, type);
     }
 
-    public static <T> T map(Class<T> type, AbstractElement element){
-        return map(type, element, new AbstractMapper());
+    public static <T> T map(ValidationContext context, Class<T> type, AbstractElement element){
+        return map(context, type, element, new AbstractMapper());
     }
 
     private final Map<String[], ValidationConfig> rules = new HashMap<>();
@@ -139,20 +139,21 @@ public class Validator {
         return rule(key, Arrays.asList(rules));
     }
 
-    public ValidationResult validate(AbstractElement rootElement){
+    public ValidationResult validate(ValidationContext context, AbstractElement rootElement) {
+        context.setValidator(this);
         Map<String[], List<String>> errors = new HashMap<>();
         for(String[] key : rules.keySet()){
-            errors.putAll(check(rules, new String[0], new String[0], key, rootElement));
+            errors.putAll(check(context, rules, new String[0], new String[0], key, rootElement));
         }
-        return new ValidationResult(errors);
+        return new ValidationResult(context, errors);
     }
 
-    private Map<String[], List<String>> check(Map<String[], ValidationConfig> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, AbstractElement element){
+    private Map<String[], List<String>> check(ValidationContext context, Map<String[], ValidationConfig> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, AbstractElement element){
         if(key.length == 0){
             Map<String[], List<String>> errors = new HashMap<>();
             ValidationConfig config = getMapValue(rules, keyPrefix);
             for(ValidationRule rule : config.rules){
-                String error = rule.validate(this, config.field, element);
+                String error = rule.validate(context, config.field, element);
                 if(error != null){
                     if(!errors.containsKey(resolvedKeyPrefix))
                         errors.put(resolvedKeyPrefix, new ArrayList<>());
@@ -175,7 +176,7 @@ public class Validator {
                     String[] innerResolvedKeyPrefix = new String[keyPrefix.length+1];
                     System.arraycopy(resolvedKeyPrefix, 0, innerResolvedKeyPrefix, 0, resolvedKeyPrefix.length);
                     innerResolvedKeyPrefix[innerResolvedKeyPrefix.length-1] = String.valueOf(i);
-                    errors.putAll(check(rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, element.array().get(i)));
+                    errors.putAll(check(context, rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, element.array().get(i)));
                 }
             }
             if(element.isObject()){
@@ -183,7 +184,7 @@ public class Validator {
                     String[] innerResolvedKeyPrefix = new String[keyPrefix.length+1];
                     System.arraycopy(resolvedKeyPrefix, 0, innerResolvedKeyPrefix, 0, resolvedKeyPrefix.length);
                     innerResolvedKeyPrefix[innerResolvedKeyPrefix.length-1] = k;
-                    errors.putAll(check(rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, element.object().get(k)));
+                    errors.putAll(check(context, rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, element.object().get(k)));
                 }
             }
             return errors;
@@ -200,7 +201,7 @@ public class Validator {
         String[] innerResolvedKeyPrefix = new String[keyPrefix.length+1];
         System.arraycopy(resolvedKeyPrefix, 0, innerResolvedKeyPrefix, 0, resolvedKeyPrefix.length);
         innerResolvedKeyPrefix[innerResolvedKeyPrefix.length-1] = key[0];
-        return check(rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, value);
+        return check(context, rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, value);
     }
 
     private static boolean stringArrayEqual(String[] a, String[] b){

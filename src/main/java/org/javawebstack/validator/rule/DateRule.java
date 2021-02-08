@@ -1,7 +1,7 @@
 package org.javawebstack.validator.rule;
 
 import org.javawebstack.abstractdata.AbstractElement;
-import org.javawebstack.validator.Validator;
+import org.javawebstack.validator.ValidationContext;
 
 import java.lang.reflect.Field;
 import java.text.DateFormat;
@@ -29,7 +29,7 @@ public class DateRule implements ValidationRule {
         }
     }
 
-    public String validate(Validator validator, Field field, AbstractElement value) {
+    public String validate(ValidationContext context, Field field, AbstractElement value) {
         if(value == null || value.isNull())
             return null;
         if(!value.isString())
