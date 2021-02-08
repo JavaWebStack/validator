@@ -11,12 +11,12 @@ public class DateRule implements ValidationRule {
 
     private final DateFormat dateFormat;
 
-    public DateRule(DateFormat dateFormat){
+    public DateRule(DateFormat dateFormat) {
         this.dateFormat = dateFormat;
     }
 
-    public DateRule(String[] params){
-        switch (params.length > 0 ? params[0] : "datetime"){
+    public DateRule(String[] params) {
+        switch (params.length > 0 ? params[0] : "datetime") {
             case "date":
                 dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 break;
@@ -30,9 +30,9 @@ public class DateRule implements ValidationRule {
     }
 
     public String validate(ValidationContext context, Field field, AbstractElement value) {
-        if(value == null || value.isNull())
+        if (value == null || value.isNull())
             return null;
-        if(!value.isString())
+        if (!value.isString())
             return "Not a valid date";
         try {
             dateFormat.parse(value.string());

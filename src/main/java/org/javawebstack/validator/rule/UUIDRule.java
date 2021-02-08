@@ -9,12 +9,12 @@ import java.util.UUID;
 public class UUIDRule implements ValidationRule {
 
     public String validate(ValidationContext context, Field field, AbstractElement value) {
-        if(!value.isString())
+        if (!value.isString())
             return "Not a valid uuid value";
         try {
             UUID.fromString(value.string());
             return null;
-        }catch (Exception ignored){
+        } catch (Exception ignored) {
             return "Not a valid uuid value";
         }
     }

@@ -9,7 +9,7 @@ public class ValidationResult {
     private final ValidationContext context;
     private final Map<String[], List<String>> errors;
 
-    ValidationResult(ValidationContext context, Map<String[], List<String>> errors){
+    ValidationResult(ValidationContext context, Map<String[], List<String>> errors) {
         this.context = context;
         this.errors = errors;
     }
@@ -18,17 +18,17 @@ public class ValidationResult {
         return context;
     }
 
-    public Map<String[], List<String>> getErrors(){
+    public Map<String[], List<String>> getErrors() {
         return errors;
     }
 
-    public Map<String, List<String>> getErrorMap(){
+    public Map<String, List<String>> getErrorMap() {
         Map<String, List<String>> errorMap = new HashMap<>();
-        getErrors().forEach((k,v) -> errorMap.put(String.join(".", k), v));
+        getErrors().forEach((k, v) -> errorMap.put(String.join(".", k), v));
         return errorMap;
     }
 
-    public boolean isValid(){
+    public boolean isValid() {
         return errors.size() == 0;
     }
 

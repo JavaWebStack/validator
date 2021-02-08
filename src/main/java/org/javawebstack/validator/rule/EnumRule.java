@@ -10,17 +10,21 @@ import java.util.stream.Collectors;
 
 public class EnumRule implements ValidationRule {
     private final List<String> values;
-    public EnumRule(List<String> values){
+
+    public EnumRule(List<String> values) {
         this.values = values;
     }
-    public EnumRule(String... values){
+
+    public EnumRule(String... values) {
         this(Arrays.asList(values));
     }
-    public EnumRule(Class<? extends Enum<?>> enumType){
+
+    public EnumRule(Class<? extends Enum<?>> enumType) {
         this(Arrays.stream(enumType.getEnumConstants()).map(Enum::name).collect(Collectors.toList()));
     }
+
     public String validate(ValidationContext context, Field field, AbstractElement value) {
-        if(value == null)
+        if (value == null)
             return null;
         return value.isString() && values.contains(value.string()) ? null : String.format("Not an element of [%s]", String.join(",", values));
     }

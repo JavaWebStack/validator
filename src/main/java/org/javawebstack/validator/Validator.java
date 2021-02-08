@@ -37,65 +37,69 @@ public class Validator {
         registerRuleType("list", ArrayRule.class);
     }
 
-    public static void registerRuleType(String name, Class<? extends ValidationRule> type){
+    public static void registerRuleType(String name, Class<? extends ValidationRule> type) {
         try {
             Constructor<? extends ValidationRule> constructor = type.getDeclaredConstructor(String[].class);
             constructor.setAccessible(true);
             validationRules.put(name, constructor);
             return;
-        } catch (NoSuchMethodException ignored) {}
+        } catch (NoSuchMethodException ignored) {
+        }
         try {
             Constructor<? extends ValidationRule> constructor = type.getDeclaredConstructor();
             constructor.setAccessible(true);
             validationRules.put(name, constructor);
-        } catch (NoSuchMethodException ignored) {}
+        } catch (NoSuchMethodException ignored) {
+        }
     }
 
-    public static ValidationRule makeRule(String name, String[] params){
+    public static ValidationRule makeRule(String name, String[] params) {
         Constructor<? extends ValidationRule> constructor = validationRules.get(name);
-        if(constructor == null)
+        if (constructor == null)
             return null;
-        if(constructor.getParameterCount() == 0){
+        if (constructor.getParameterCount() == 0) {
             try {
                 return constructor.newInstance();
-            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {}
-        }else{
+            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {
+            }
+        } else {
             try {
                 return constructor.newInstance((Object) params);
-            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {}
+            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {
+            }
         }
         return null;
     }
 
-    public static ValidationRule makeRule(String source){
+    public static ValidationRule makeRule(String source) {
         String[] params = null;
-        if(source.contains("(")){
+        if (source.contains("(")) {
             String[] spl = source.split("\\(", 2);
             source = spl[0];
             String s = spl[1];
-            s = s.substring(0, s.length()-1);
-            AbstractArray array = AbstractArray.fromJson(new Gson().fromJson("["+s+"]", JsonArray.class));
-            if(array.stream().filter(e -> e.isPrimitive()).count() == array.size()){
+            s = s.substring(0, s.length() - 1);
+            AbstractArray array = AbstractArray.fromJson(new Gson().fromJson("[" + s + "]", JsonArray.class));
+            if (array.stream().filter(e -> e.isPrimitive()).count() == array.size()) {
                 params = new String[array.size()];
-                for(int i=0; i<params.length; i++)
+                for (int i = 0; i < params.length; i++)
                     params[i] = array.get(i).toString();
             }
         }
-        if(params == null)
+        if (params == null)
             params = new String[0];
         return makeRule(source, params);
     }
 
-    public static ValidationRule[] makeRules(String... sources){
+    public static ValidationRule[] makeRules(String... sources) {
         ValidationRule[] rules = new ValidationRule[sources.length];
-        for(int i=0; i<rules.length; i++)
+        for (int i = 0; i < rules.length; i++)
             rules[i] = makeRule(sources[i]);
         return rules;
     }
 
-    public static Validator getValidator(Class<?> type){
+    public static Validator getValidator(Class<?> type) {
         Validator validator = validators.get(type);
-        if(validator == null){
+        if (validator == null) {
             validator = new Validator();
             getClassRules(null, type).forEach(validator::rule);
             validators.put(type, validator);
@@ -103,124 +107,125 @@ public class Validator {
         return validator;
     }
 
-    public static <T> T map(ValidationContext context, Class<T> type, AbstractElement element, AbstractMapper mapper){
+    public static <T> T map(ValidationContext context, Class<T> type, AbstractElement element, AbstractMapper mapper) {
         Validator validator = getValidator(type);
         ValidationResult result = validator.validate(context, element);
-        if(!result.isValid())
+        if (!result.isValid())
             throw new ValidationException(result);
         return mapper.fromAbstract(element, type);
     }
 
-    public static <T> T map(ValidationContext context, Class<T> type, AbstractElement element){
+    public static <T> T map(ValidationContext context, Class<T> type, AbstractElement element) {
         return map(context, type, element, new AbstractMapper());
     }
 
     private final Map<String[], ValidationConfig> rules = new HashMap<>();
 
-    public Validator rule(String[] key, ValidationRule... rules){
+    public Validator rule(String[] key, ValidationRule... rules) {
         return rule(key, Arrays.asList(rules));
     }
 
-    public Validator rule(String[] key, List<ValidationRule> rules){
+    public Validator rule(String[] key, List<ValidationRule> rules) {
         this.rules.put(key, new ValidationConfig(null, rules));
         return this;
     }
 
-    private Validator rule(String[] key, ValidationConfig config){
+    private Validator rule(String[] key, ValidationConfig config) {
         this.rules.put(key, config);
         return this;
     }
 
-    public Validator rule(String key, List<ValidationRule> rules){
+    public Validator rule(String key, List<ValidationRule> rules) {
         return rule(Arrays.stream(key.split("\\.")).map(k -> k.equals("*") ? null : k).toArray(String[]::new), rules);
     }
 
-    public Validator rule(String key, ValidationRule... rules){
+    public Validator rule(String key, ValidationRule... rules) {
         return rule(key, Arrays.asList(rules));
     }
 
     public ValidationResult validate(ValidationContext context, AbstractElement rootElement) {
         context.setValidator(this);
         Map<String[], List<String>> errors = new HashMap<>();
-        for(String[] key : rules.keySet()){
+        for (String[] key : rules.keySet()) {
             errors.putAll(check(context, rules, new String[0], new String[0], key, rootElement));
         }
         return new ValidationResult(context, errors);
     }
 
-    private Map<String[], List<String>> check(ValidationContext context, Map<String[], ValidationConfig> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, AbstractElement element){
-        if(key.length == 0){
+    private Map<String[], List<String>> check(ValidationContext context, Map<String[], ValidationConfig> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, AbstractElement element) {
+        if (key.length == 0) {
             Map<String[], List<String>> errors = new HashMap<>();
             ValidationConfig config = getMapValue(rules, keyPrefix);
-            for(ValidationRule rule : config.rules){
+            for (ValidationRule rule : config.rules) {
                 String error = rule.validate(context, config.field, element);
-                if(error != null){
-                    if(!errors.containsKey(resolvedKeyPrefix))
+                if (error != null) {
+                    if (!errors.containsKey(resolvedKeyPrefix))
                         errors.put(resolvedKeyPrefix, new ArrayList<>());
                     errors.get(resolvedKeyPrefix).add(error);
                 }
             }
             return errors;
         }
-        if(element == null)
+        if (element == null)
             element = AbstractNull.INSTANCE;
-        String[] innerKey = new String[key.length-1];
+        String[] innerKey = new String[key.length - 1];
         System.arraycopy(key, 1, innerKey, 0, innerKey.length);
-        String[] innerKeyPrefix = new String[keyPrefix.length+1];
+        String[] innerKeyPrefix = new String[keyPrefix.length + 1];
         System.arraycopy(keyPrefix, 0, innerKeyPrefix, 0, keyPrefix.length);
-        innerKeyPrefix[innerKeyPrefix.length-1] = key[0];
-        if(key[0].equals("*")){
+        innerKeyPrefix[innerKeyPrefix.length - 1] = key[0];
+        if (key[0].equals("*")) {
             Map<String[], List<String>> errors = new HashMap<>();
-            if(element.isArray()){
-                for(int i=0; i<element.array().size(); i++){
-                    String[] innerResolvedKeyPrefix = new String[keyPrefix.length+1];
+            if (element.isArray()) {
+                for (int i = 0; i < element.array().size(); i++) {
+                    String[] innerResolvedKeyPrefix = new String[keyPrefix.length + 1];
                     System.arraycopy(resolvedKeyPrefix, 0, innerResolvedKeyPrefix, 0, resolvedKeyPrefix.length);
-                    innerResolvedKeyPrefix[innerResolvedKeyPrefix.length-1] = String.valueOf(i);
+                    innerResolvedKeyPrefix[innerResolvedKeyPrefix.length - 1] = String.valueOf(i);
                     errors.putAll(check(context, rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, element.array().get(i)));
                 }
             }
-            if(element.isObject()){
-                for(String k : element.object().keys()){
-                    String[] innerResolvedKeyPrefix = new String[keyPrefix.length+1];
+            if (element.isObject()) {
+                for (String k : element.object().keys()) {
+                    String[] innerResolvedKeyPrefix = new String[keyPrefix.length + 1];
                     System.arraycopy(resolvedKeyPrefix, 0, innerResolvedKeyPrefix, 0, resolvedKeyPrefix.length);
-                    innerResolvedKeyPrefix[innerResolvedKeyPrefix.length-1] = k;
+                    innerResolvedKeyPrefix[innerResolvedKeyPrefix.length - 1] = k;
                     errors.putAll(check(context, rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, element.object().get(k)));
                 }
             }
             return errors;
         }
         AbstractElement value = AbstractNull.INSTANCE;
-        if(element.isArray()){
+        if (element.isArray()) {
             try {
                 value = element.array().get(Integer.parseInt(key[0]));
-            }catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
         }
-        if(element.isObject()){
+        if (element.isObject()) {
             value = element.object().get(key[0]);
         }
-        String[] innerResolvedKeyPrefix = new String[keyPrefix.length+1];
+        String[] innerResolvedKeyPrefix = new String[keyPrefix.length + 1];
         System.arraycopy(resolvedKeyPrefix, 0, innerResolvedKeyPrefix, 0, resolvedKeyPrefix.length);
-        innerResolvedKeyPrefix[innerResolvedKeyPrefix.length-1] = key[0];
+        innerResolvedKeyPrefix[innerResolvedKeyPrefix.length - 1] = key[0];
         return check(context, rules, innerKeyPrefix, innerResolvedKeyPrefix, innerKey, value);
     }
 
-    private static boolean stringArrayEqual(String[] a, String[] b){
-        if(a.length != b.length)
+    private static boolean stringArrayEqual(String[] a, String[] b) {
+        if (a.length != b.length)
             return false;
-        for(int i=0; i<a.length; i++){
-            if(a[i] == null && b[i] == null)
+        for (int i = 0; i < a.length; i++) {
+            if (a[i] == null && b[i] == null)
                 continue;
-            if(a[i] == null || b[i] == null)
+            if (a[i] == null || b[i] == null)
                 return false;
-            if(!a[i].equals(b[i]))
+            if (!a[i].equals(b[i]))
                 return false;
         }
         return true;
     }
 
-    private static <V> V getMapValue(Map<String[], V> map, String[] key){
-        for(String[] k : map.keySet()){
-            if(stringArrayEqual(k, key)){
+    private static <V> V getMapValue(Map<String[], V> map, String[] key) {
+        for (String[] k : map.keySet()) {
+            if (stringArrayEqual(k, key)) {
                 return map.get(k);
             }
         }
@@ -228,8 +233,8 @@ public class Validator {
     }
 
     private static <V> void putValidationConfigMapValue(Map<String[], ValidationConfig> map, String[] key, ValidationConfig value) {
-        for(String[] k : map.keySet()){
-            if(stringArrayEqual(k, key)){
+        for (String[] k : map.keySet()) {
+            if (stringArrayEqual(k, key)) {
                 map.put(k, value);
                 return;
             }
@@ -239,30 +244,30 @@ public class Validator {
 
     private static void addMapRules(Field field, Map<String[], ValidationConfig> map, String[] key, List<ValidationRule> rules) {
         ValidationConfig config = getMapValue(map, key);
-        if(config == null)
+        if (config == null)
             config = new ValidationConfig(field, new ArrayList<>());
         config.rules.addAll(rules);
         putValidationConfigMapValue(map, key, config);
     }
 
-    private static String toSnakeCase(String source){
+    private static String toSnakeCase(String source) {
         StringBuilder sb = new StringBuilder();
         sb.append(Character.toLowerCase(source.charAt(0)));
-        for(int i=1; i<source.length(); i++){
-            if(Character.isUpperCase(source.charAt(i))){
-                if(!Character.isUpperCase(source.charAt(i-1)))
+        for (int i = 1; i < source.length(); i++) {
+            if (Character.isUpperCase(source.charAt(i))) {
+                if (!Character.isUpperCase(source.charAt(i - 1)))
                     sb.append("_");
                 sb.append(Character.toLowerCase(source.charAt(i)));
-            }else{
+            } else {
                 sb.append(source.charAt(i));
             }
         }
         return sb.toString();
     }
 
-    private static String getFieldName(Field field){
+    private static String getFieldName(Field field) {
         SerializedName[] serializedNames = field.getAnnotationsByType(SerializedName.class);
-        if(serializedNames.length > 0)
+        if (serializedNames.length > 0)
             return serializedNames[0].value();
         return toSnakeCase(field.getName());
     }
@@ -270,78 +275,79 @@ public class Validator {
     private static class ValidationConfig {
         private final Field field;
         private final List<ValidationRule> rules;
+
         public ValidationConfig(Field field, List<ValidationRule> rules) {
             this.field = field;
             this.rules = rules;
         }
     }
 
-    private static Map<String[], ValidationConfig> getClassRules(Field field, Class<?> type){
+    private static Map<String[], ValidationConfig> getClassRules(Field field, Class<?> type) {
         Map<String[], ValidationConfig> rules = new HashMap<>();
-        if(type.isAnnotation())
+        if (type.isAnnotation())
             return rules;
-        if(type.equals(String.class))
+        if (type.equals(String.class))
             return rules;
-        if(type.equals(Timestamp.class) || type.equals(java.util.Date.class)){
+        if (type.equals(Timestamp.class) || type.equals(java.util.Date.class)) {
             rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DateRule(new String[]{}))));
             return rules;
         }
-        if(type.equals(Date.class)){
+        if (type.equals(Date.class)) {
             rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DateRule(new String[]{"date"}))));
             return rules;
         }
-        if(type.equals(Boolean.class)){
+        if (type.equals(Boolean.class)) {
             rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new BooleanRule())));
             return rules;
         }
-        if(type.equals(Integer.class)){
+        if (type.equals(Integer.class)) {
             rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new IntegerRule(Integer.MIN_VALUE, Integer.MAX_VALUE))));
             return rules;
         }
-        if(type.equals(UUID.class)){
+        if (type.equals(UUID.class)) {
             rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new UUIDRule())));
             return rules;
         }
-        if(type.isEnum()){
+        if (type.isEnum()) {
             rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new EnumRule((Class<? extends Enum<?>>) type))));
             return rules;
         }
-        if(type.isArray()){
+        if (type.isArray()) {
             getClassRules(null, type.getComponentType()).forEach((key, validators) -> {
-                String[] actualKey = new String[key.length+1];
+                String[] actualKey = new String[key.length + 1];
                 actualKey[0] = "*";
                 System.arraycopy(key, 0, actualKey, 1, key.length);
                 addMapRules(null, rules, actualKey, validators.rules);
             });
             return rules;
         }
-        for(Field f : getFieldsRecursive(type)){
+        for (Field f : getFieldsRecursive(type)) {
             String name = getFieldName(f);
             getClassRules(f, f.getType()).forEach((key, validators) -> {
-                String[] actualKey = new String[key.length+1];
+                String[] actualKey = new String[key.length + 1];
                 actualKey[0] = name;
                 System.arraycopy(key, 0, actualKey, 1, key.length);
                 addMapRules(f, rules, actualKey, validators.rules);
             });
             f.setAccessible(true);
             Rule[] ruleAnnotations = f.getDeclaredAnnotationsByType(Rule.class);
-            if(ruleAnnotations.length > 0){
+            if (ruleAnnotations.length > 0) {
                 List<ValidationRule> r = new ArrayList<>();
-                for(String source : ruleAnnotations[0].value()){
+                for (String source : ruleAnnotations[0].value()) {
                     ValidationRule rule = Validator.makeRule(source);
-                    if(rule != null)
+                    if (rule != null)
                         r.add(rule);
                 }
-                if(r.size() > 0)
+                if (r.size() > 0)
                     addMapRules(f, rules, new String[]{name}, r);
             }
         }
         return rules;
     }
 
-    private static List<Field> getFieldsRecursive(Class<?> type){
+    private static List<Field> getFieldsRecursive(Class<?> type) {
         List<Field> fields;
-        if(type.getSuperclass() != null && !type.getSuperclass().equals(Object.class))
+        if (type.getSuperclass() != null && !type.getSuperclass().equals(Object.class))
             fields = getFieldsRecursive(type.getSuperclass());
         else
             fields = new ArrayList<>();
