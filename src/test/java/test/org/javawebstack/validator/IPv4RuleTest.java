@@ -6,8 +6,6 @@ import org.javawebstack.validator.ValidationContext;
 import org.javawebstack.validator.Validator;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
