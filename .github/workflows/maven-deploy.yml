@@ -9,8 +9,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-        settings-path: ${{ github.workspace }}/build
     - name: Build
       run: mvn -B package --file pom.xml
     - name: Deploy to JavaWebStack Repository
-      run: mvn deploy
+      run: mvn deploy -S build/settings.xml
