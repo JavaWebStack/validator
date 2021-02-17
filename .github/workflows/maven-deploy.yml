@@ -12,4 +12,4 @@ jobs:
     - name: Build
       run: mvn -B package --file pom.xml
     - name: Deploy to JavaWebStack Repository
-      run: mvn deploy -S build/settings.xml
+      run: mvn deploy -s build/settings.xml
