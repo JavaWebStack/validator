@@ -13,3 +13,6 @@ jobs:
       run: mvn -B package --file pom.xml
     - name: Deploy to JavaWebStack Repository
       run: mvn deploy -s build/settings.xml
+      env:
+        DEPLOYMENT_USERNAME: $DEPLOYMENT_USERNAME
+        DEPLOYMENT_PASSWORD: $DEPLOYMENT_PASSWORD
