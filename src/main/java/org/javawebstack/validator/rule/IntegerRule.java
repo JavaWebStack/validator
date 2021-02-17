@@ -5,6 +5,9 @@ import org.javawebstack.validator.ValidationContext;
 
 import java.lang.reflect.Field;
 
+/**
+ * Rule: int, integer
+ */
 public class IntegerRule implements ValidationRule {
 
     private final int min;

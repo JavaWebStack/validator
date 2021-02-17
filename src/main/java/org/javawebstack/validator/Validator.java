@@ -33,6 +33,7 @@ public class Validator {
         registerRuleType("int", IntegerRule.class);
         registerRuleType("integer", IntegerRule.class);
         registerRuleType("numeric", NumericRule.class);
+        registerRuleType("num", NumericRule.class);
         registerRuleType("date", DateRule.class);
         registerRuleType("array", ArrayRule.class);
         registerRuleType("list", ArrayRule.class);
@@ -40,6 +41,7 @@ public class Validator {
         registerRuleType("alpha_num", AlphaNumRule.class);
         registerRuleType("alpha_dash", AlphaDashRule.class);
         registerRuleType("email", EmailRule.class);
+        registerRuleType("regex", RegexRule.class);
     }
 
     public static void registerRuleType(String name, Class<? extends ValidationRule> type) {

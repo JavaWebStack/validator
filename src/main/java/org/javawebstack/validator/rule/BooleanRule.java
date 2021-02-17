@@ -5,6 +5,9 @@ import org.javawebstack.validator.ValidationContext;
 
 import java.lang.reflect.Field;
 
+/**
+ * Rule: boolean, bool
+ */
 public class BooleanRule implements ValidationRule {
     public String validate(ValidationContext context, Field field, AbstractElement value) {
         if (value == null)

@@ -6,6 +6,9 @@ import org.javawebstack.validator.ValidationContext;
 import java.lang.reflect.Field;
 import java.util.regex.Pattern;
 
+/**
+ * Rule: regex
+ */
 public class RegexRule implements ValidationRule {
     private final String regex;
     private final Pattern pattern;

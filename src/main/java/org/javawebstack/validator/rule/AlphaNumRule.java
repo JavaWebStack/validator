@@ -5,6 +5,9 @@ import org.javawebstack.validator.ValidationContext;
 
 import java.lang.reflect.Field;
 
+/**
+ * Rule: alpha_num
+ */
 public class AlphaNumRule implements ValidationRule {
     @Override
     public String validate(ValidationContext context, Field field, AbstractElement value) {

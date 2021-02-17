@@ -7,6 +7,9 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.lang.reflect.Field;
 
+/**
+ * Rule: email
+ */
 public class EmailRule implements ValidationRule {
     @Override
     public String validate(ValidationContext context, Field field, AbstractElement value) {

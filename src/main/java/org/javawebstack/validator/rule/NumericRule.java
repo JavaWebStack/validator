@@ -5,6 +5,9 @@ import org.javawebstack.validator.ValidationContext;
 
 import java.lang.reflect.Field;
 
+/**
+ * Rule: numeric, num
+ */
 public class NumericRule implements ValidationRule {
     @Override
     public String validate(ValidationContext context, Field field, AbstractElement value) {
@@ -17,7 +20,7 @@ public class NumericRule implements ValidationRule {
         else if (value.isString()) {
             try {
                 v = Float.parseFloat(value.string());
-            } catch(NumberFormatException ex) {
+            } catch (NumberFormatException ex) {
                 return "Not a numeric value";
             }
         } else {

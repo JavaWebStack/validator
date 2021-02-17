@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Rule: enum
+ */
 public class EnumRule implements ValidationRule {
     private final List<String> values;
 

@@ -5,6 +5,9 @@ import org.javawebstack.validator.ValidationContext;
 
 import java.lang.reflect.Field;
 
+/**
+ * Rule: ipv6
+ */
 public class IPv6AddressRule extends RegexRule {
     public IPv6AddressRule() {
         super("([0-9a-fA-F]{1,4})(:(?1)){7}");

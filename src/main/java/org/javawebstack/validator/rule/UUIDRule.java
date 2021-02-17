@@ -6,6 +6,9 @@ import org.javawebstack.validator.ValidationContext;
 import java.lang.reflect.Field;
 import java.util.UUID;
 
+/**
+ * Rule: uuid
+ */
 public class UUIDRule implements ValidationRule {
 
     public String validate(ValidationContext context, Field field, AbstractElement value) {

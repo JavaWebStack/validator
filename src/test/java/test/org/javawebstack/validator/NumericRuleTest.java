@@ -9,20 +9,20 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class EmailRuleTest {
+public class NumericRuleTest {
 
     @Test
-    public void testSimpleEMailRule() {
+    public void testSimpleNumericRule() {
         Validator validator = Validator.getValidator(TestObject1.class);
         TestObject1 test = new TestObject1();
-        test.email = "Test";
+        test.email = "abc";
         assertFalse(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
-        test.email = "info@javawebstack.org";
+        test.email = "123";
         assertTrue(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
     }
 
     private static class TestObject1 {
-        @Rule("email")
+        @Rule("numeric")
         String email;
     }
 

@@ -7,6 +7,9 @@ import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+/**
+ * Rule: date
+ */
 public class DateRule implements ValidationRule {
 
     private final DateFormat dateFormat;
