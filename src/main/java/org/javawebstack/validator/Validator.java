@@ -152,23 +152,23 @@ public class Validator {
 
     public ValidationResult validate(ValidationContext context, AbstractElement rootElement) {
         context.setValidator(this);
-        Map<String[], List<String>> errors = new HashMap<>();
+        Map<String[], List<ValidationError>> errors = new HashMap<>();
         for (String[] key : rules.keySet()) {
             errors.putAll(check(context, rules, new String[0], new String[0], key, rootElement));
         }
         return new ValidationResult(context, errors);
     }
 
-    private Map<String[], List<String>> check(ValidationContext context, Map<String[], ValidationConfig> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, AbstractElement element) {
+    private Map<String[], List<ValidationError>> check(ValidationContext context, Map<String[], ValidationConfig> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, AbstractElement element) {
         if (key.length == 0) {
-            Map<String[], List<String>> errors = new HashMap<>();
+            Map<String[], List<ValidationError>> errors = new HashMap<>();
             ValidationConfig config = getMapValue(rules, keyPrefix);
             for (ValidationRule rule : config.rules) {
                 String error = rule.validate(context, config.field, element);
                 if (error != null) {
                     if (!errors.containsKey(resolvedKeyPrefix))
                         errors.put(resolvedKeyPrefix, new ArrayList<>());
-                    errors.get(resolvedKeyPrefix).add(error);
+                    errors.get(resolvedKeyPrefix).add(new ValidationError(rule, error));
                 }
             }
             return errors;
@@ -181,7 +181,7 @@ public class Validator {
         System.arraycopy(keyPrefix, 0, innerKeyPrefix, 0, keyPrefix.length);
         innerKeyPrefix[innerKeyPrefix.length - 1] = key[0];
         if (key[0].equals("*")) {
-            Map<String[], List<String>> errors = new HashMap<>();
+            Map<String[], List<ValidationError>> errors = new HashMap<>();
             if (element.isArray()) {
                 for (int i = 0; i < element.array().size(); i++) {
                     String[] innerResolvedKeyPrefix = new String[keyPrefix.length + 1];
