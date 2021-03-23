@@ -10,6 +10,6 @@ import java.lang.reflect.Field;
  */
 public class RequiredRule implements ValidationRule {
     public String validate(ValidationContext context, Field field, AbstractElement value) {
-        return value != null ? null : "Missing required field";
+        return !value.isNull() ? null : "Missing required field";
     }
 }

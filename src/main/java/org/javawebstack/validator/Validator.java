@@ -160,6 +160,8 @@ public class Validator {
     }
 
     private Map<String[], List<ValidationError>> check(ValidationContext context, Map<String[], ValidationConfig> rules, String[] keyPrefix, String[] resolvedKeyPrefix, String[] key, AbstractElement element) {
+        if (element == null)
+            element = AbstractNull.INSTANCE;
         if (key.length == 0) {
             Map<String[], List<ValidationError>> errors = new HashMap<>();
             ValidationConfig config = getMapValue(rules, keyPrefix);
@@ -173,8 +175,6 @@ public class Validator {
             }
             return errors;
         }
-        if (element == null)
-            element = AbstractNull.INSTANCE;
         String[] innerKey = new String[key.length - 1];
         System.arraycopy(key, 1, innerKey, 0, innerKey.length);
         String[] innerKeyPrefix = new String[keyPrefix.length + 1];
