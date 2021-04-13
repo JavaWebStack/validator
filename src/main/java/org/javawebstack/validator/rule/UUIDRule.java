@@ -12,6 +12,8 @@ import java.util.UUID;
 public class UUIDRule implements ValidationRule {
 
     public String validate(ValidationContext context, Field field, AbstractElement value) {
+        if(value == null || value.isNull())
+            return null;
         if (!value.isString())
             return "Not a valid uuid value";
         try {
