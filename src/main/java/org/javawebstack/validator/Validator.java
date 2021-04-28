@@ -1,7 +1,5 @@
 package org.javawebstack.validator;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.annotations.SerializedName;
 import org.javawebstack.abstractdata.AbstractArray;
 import org.javawebstack.abstractdata.AbstractElement;
@@ -85,7 +83,7 @@ public class Validator {
             source = spl[0];
             String s = spl[1];
             s = s.substring(0, s.length() - 1);
-            AbstractArray array = AbstractArray.fromJson(new Gson().fromJson("[" + s + "]", JsonArray.class));
+            AbstractArray array = AbstractElement.fromJson("[" + s + "]").array();
             if (array.stream().filter(e -> e.isPrimitive()).count() == array.size()) {
                 params = new String[array.size()];
                 for (int i = 0; i < params.length; i++)
