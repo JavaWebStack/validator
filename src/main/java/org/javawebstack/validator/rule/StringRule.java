@@ -30,7 +30,7 @@ public class StringRule implements ValidationRule {
     }
 
     public String validate(ValidationContext context, Field field, AbstractElement value) {
-        if (value == null)
+        if (value == null || value.isNull())
             return null;
         if (!value.isPrimitive())
             return "Not a string value";

@@ -40,7 +40,7 @@ public class IntegerRule implements ValidationRule {
     }
 
     public String validate(ValidationContext context, Field field, AbstractElement value) {
-        if (value == null)
+        if (value == null || value.isNull())
             return null;
         int v;
         if (value.isNumber()) {

@@ -19,7 +19,7 @@ public class RegexRule implements ValidationRule {
     }
 
     public String validate(ValidationContext context, Field field, AbstractElement value) {
-        if (value == null)
+        if (value == null || value.isNull())
             return null;
         return value.isString() && pattern.matcher(value.string()).matches() ? null : "Doesn't match the expected pattern";
     }

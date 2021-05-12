@@ -27,7 +27,7 @@ public class EnumRule implements ValidationRule {
     }
 
     public String validate(ValidationContext context, Field field, AbstractElement value) {
-        if (value == null)
+        if (value == null || value.isNull())
             return null;
         return value.isString() && values.contains(value.string()) ? null : String.format("Not an element of [%s]", String.join(",", values));
     }

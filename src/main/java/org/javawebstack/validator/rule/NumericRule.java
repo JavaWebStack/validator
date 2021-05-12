@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
 public class NumericRule implements ValidationRule {
     @Override
     public String validate(ValidationContext context, Field field, AbstractElement value) {
-        if (value == null)
+        if (value == null || value.isNull())
             return null;
 
         float v;
