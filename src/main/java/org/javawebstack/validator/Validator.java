@@ -293,6 +293,8 @@ public class Validator {
             return rules;
         if (type.equals(String.class))
             return rules;
+        if (type.equals(Long.class))
+            return rules;
         if (type.equals(Timestamp.class) || type.equals(java.util.Date.class)) {
             rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DateRule(new String[]{}))));
             return rules;
@@ -307,6 +309,10 @@ public class Validator {
         }
         if (type.equals(Integer.class)) {
             rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new IntegerRule(Integer.MIN_VALUE, Integer.MAX_VALUE))));
+            return rules;
+        }
+        if (type.equals(Double.class) || type.equals(Float.class)) {
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new NumericRule())));
             return rules;
         }
         if (type.equals(UUID.class)) {
