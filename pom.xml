@@ -125,6 +125,11 @@
                         <configuration>
                             <keyname>A313520526A8DFE1C2A30399C35A3D43C557B112</keyname>
                             <passphraseServerId>gpg</passphraseServerId>
+                            <gpgArguments>
+                                <arg>--no-tty</arg>
+                                <arg>--batch</arg>
+                                <arg>--yes</arg>
+                            </gpgArguments>
                         </configuration>
                     </execution>
                 </executions>
