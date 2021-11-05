@@ -16,3 +16,12 @@ A validation library allowing to deep-validate data structures
 
 ## Documentation
 You can find the current docs on our [website](https://docs.javawebstack.org/framework/validator). This is a work-in-progress project though so it's not yet complete.
+
+## Maven
+```xml
+<dependency>
+    <groupId>org.javawebstack</groupId>
+    <artifactId>validator</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
