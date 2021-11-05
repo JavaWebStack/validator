@@ -15,7 +15,7 @@
     <version>${buildVersion}</version>
 
     <name>validator</name>
-    <description>Request Validation Library</description>
+    <description>A validation library allowing to deep-validate data structures</description>
     <url>https://github.com/JavaWebStack/validator</url>
 
     <licenses>
