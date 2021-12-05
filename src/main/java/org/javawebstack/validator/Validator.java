@@ -47,7 +47,7 @@ public class Validator {
     }
 
     public static void registerRuleType(String name, Class<? extends ValidationRule> type, Class<? extends Annotation> annotationClass) {
-        if (!ruleAnnotationClasses.containsKey(type))
+        if (!ruleAnnotationClasses.containsKey(type) && annotationClass != null)
             ruleAnnotationClasses.put(type, annotationClass);
         try {
             Constructor<? extends ValidationRule> constructor = type.getDeclaredConstructor(String[].class);
