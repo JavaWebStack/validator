@@ -9,26 +9,34 @@ import java.util.regex.Pattern;
 /**
  * Rule: regex
  */
-public class RegexRule implements ValidationRule {
-    private final String regex;
-    private final Pattern pattern;
+public @interface RegexRule {
+    String value();
 
-    public RegexRule(String regex) {
-        this.regex = regex;
-        this.pattern = Pattern.compile(regex);
-    }
+    class Validator implements ValidationRule {
+        private final String regex;
+        private final Pattern pattern;
 
-    public String validate(ValidationContext context, Field field, AbstractElement value) {
-        if (value == null || value.isNull())
-            return null;
-        return value.isString() && pattern.matcher(value.string()).matches() ? null : "Doesn't match the expected pattern";
-    }
+        public Validator(RegexRule rule) {
+            this(rule.value());
+        }
 
-    public String getRegex() {
-        return regex;
-    }
+        public Validator(String regex) {
+            this.regex = regex;
+            this.pattern = Pattern.compile(regex);
+        }
 
-    public Pattern getPattern() {
-        return pattern;
+        public String validate(ValidationContext context, Field field, AbstractElement value) {
+            if (value == null || value.isNull())
+                return null;
+            return value.isString() && pattern.matcher(value.string()).matches() ? null : "Doesn't match the expected pattern";
+        }
+
+        public String getRegex() {
+            return regex;
+        }
+
+        public Pattern getPattern() {
+            return pattern;
+        }
     }
 }

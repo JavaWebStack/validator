@@ -7,6 +7,7 @@ import org.javawebstack.abstractdata.AbstractMapper;
 import org.javawebstack.abstractdata.AbstractNull;
 import org.javawebstack.validator.rule.*;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -19,30 +20,35 @@ public class Validator {
     private static final Map<String, Constructor<? extends ValidationRule>> validationRules = new HashMap<>();
     private static final Map<Class<?>, Validator> validators = new HashMap<>();
 
+    private static final Map<Class<? extends ValidationRule>, Class<? extends Annotation>> ruleAnnotationClasses = new HashMap<>();
+
     static {
-        registerRuleType("string", StringRule.class);
-        registerRuleType("boolean", BooleanRule.class);
-        registerRuleType("bool", BooleanRule.class);
-        registerRuleType("enum", EnumRule.class);
-        registerRuleType("required", RequiredRule.class);
-        registerRuleType("req", RequiredRule.class);
-        registerRuleType("ipv4", IPv4AddressRule.class);
-        registerRuleType("ipv6", IPv6AddressRule.class);
-        registerRuleType("int", IntegerRule.class);
-        registerRuleType("integer", IntegerRule.class);
-        registerRuleType("numeric", NumericRule.class);
-        registerRuleType("num", NumericRule.class);
-        registerRuleType("date", DateRule.class);
-        registerRuleType("array", ArrayRule.class);
-        registerRuleType("list", ArrayRule.class);
-        registerRuleType("alpha", AlphaRule.class);
-        registerRuleType("alpha_num", AlphaNumRule.class);
-        registerRuleType("alpha_dash", AlphaDashRule.class);
-        registerRuleType("email", EmailRule.class);
-        registerRuleType("regex", RegexRule.class);
+        registerRuleType("string",     StringRule.Validator.class,      StringRule.class);
+        registerRuleType("boolean",    BooleanRule.Validator.class,     BooleanRule.class);
+        registerRuleType("bool",       BooleanRule.Validator.class,     BooleanRule.class);
+        registerRuleType("enum",       EnumRule.Validator.class,        EnumRule.class);
+        registerRuleType("required",   RequiredRule.Validator.class,    RequiredRule.class);
+        registerRuleType("req",        RequiredRule.Validator.class,    RequiredRule.class);
+        registerRuleType("ipv4",       IPv4AddressRule.Validator.class, IPv4AddressRule.class);
+        registerRuleType("ipv6",       IPv6AddressRule.Validator.class, IPv6AddressRule.class);
+        registerRuleType("int",        IntegerRule.Validator.class,     IntegerRule.class);
+        registerRuleType("integer",    IntegerRule.Validator.class,     IntegerRule.class);
+        registerRuleType("numeric",    NumericRule.Validator.class,     NumericRule.class);
+        registerRuleType("num",        NumericRule.Validator.class,     NumericRule.class);
+        registerRuleType("date",       DateRule.Validator.class,        DateRule.class);
+        registerRuleType("array",      ArrayRule.Validator.class,       ArrayRule.class);
+        registerRuleType("list",       ArrayRule.Validator.class,       ArrayRule.class);
+        registerRuleType("alpha",      AlphaRule.Validator.class,       AlphaRule.class);
+        registerRuleType("alpha_num",  AlphaNumRule.Validator.class,    AlphaNumRule.class);
+        registerRuleType("alpha_dash", AlphaDashRule.Validator.class,   AlphaDashRule.class);
+        registerRuleType("email",      EmailRule.Validator.class,       EmailRule.class);
+        registerRuleType("regex",      RegexRule.Validator.class,       RegexRule.class);
+        registerRuleType("uuid",       UUIDRule.Validator.class,        UUIDRule.class);
     }
 
-    public static void registerRuleType(String name, Class<? extends ValidationRule> type) {
+    public static void registerRuleType(String name, Class<? extends ValidationRule> type, Class<? extends Annotation> annotationClass) {
+        if (!ruleAnnotationClasses.containsKey(type) && annotationClass != null)
+            ruleAnnotationClasses.put(type, annotationClass);
         try {
             Constructor<? extends ValidationRule> constructor = type.getDeclaredConstructor(String[].class);
             constructor.setAccessible(true);
@@ -296,31 +302,31 @@ public class Validator {
         if (type.equals(Long.class))
             return rules;
         if (type.equals(Timestamp.class) || type.equals(java.util.Date.class)) {
-            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DateRule(new String[]{}))));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DateRule.Validator(new String[]{}))));
             return rules;
         }
         if (type.equals(Date.class)) {
-            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DateRule(new String[]{"date"}))));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DateRule.Validator(new String[]{"date"}))));
             return rules;
         }
         if (type.equals(Boolean.class)) {
-            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new BooleanRule())));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new BooleanRule.Validator())));
             return rules;
         }
         if (type.equals(Integer.class)) {
-            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new IntegerRule(Integer.MIN_VALUE, Integer.MAX_VALUE))));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new IntegerRule.Validator(Integer.MIN_VALUE, Integer.MAX_VALUE))));
             return rules;
         }
         if (type.equals(Double.class) || type.equals(Float.class)) {
-            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new NumericRule())));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new NumericRule.Validator())));
             return rules;
         }
         if (type.equals(UUID.class)) {
-            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new UUIDRule())));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new UUIDRule.Validator())));
             return rules;
         }
         if (type.isEnum()) {
-            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new EnumRule((Class<? extends Enum<?>>) type))));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new EnumRule.Validator((Class<? extends Enum<?>>) type))));
             return rules;
         }
         if (type.isArray()) {
@@ -352,6 +358,19 @@ public class Validator {
                 if (r.size() > 0)
                     addMapRules(f, rules, new String[]{name}, r);
             }
+            ruleAnnotationClasses.entrySet().stream().distinct().forEach(annotation -> {
+                Annotation a = f.getDeclaredAnnotation(annotation.getValue());
+                if (a != null) {
+                    List<ValidationRule> r = new ArrayList<>();
+                    try {
+                        Constructor<ValidationRule> constructor = (Constructor<ValidationRule>) annotation.getKey().getDeclaredConstructor(annotation.getValue());
+                        constructor.setAccessible(true);
+                        r.add(constructor.newInstance(a));
+                    } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException ignored) {}
+                    if (r.size() > 0)
+                        addMapRules(f, rules, new String[]{name}, r);
+                }
+            });
         }
         return rules;
     }
