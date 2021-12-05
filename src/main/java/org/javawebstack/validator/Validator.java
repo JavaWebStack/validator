@@ -20,50 +20,35 @@ public class Validator {
     private static final Map<String, Constructor<? extends ValidationRule>> validationRules = new HashMap<>();
     private static final Map<Class<?>, Validator> validators = new HashMap<>();
 
-    private static final List<Class<? extends Annotation>> RULE_ANNOTATIONS = Arrays.asList(
-            StringRule.class,
-            BooleanRule.class,
-            EnumRule.class,
-            RequiredRule.class,
-            IPv4AddressRule.class,
-            IPv6AddressRule.class,
-            IntegerRule.class,
-            NumericRule.class,
-            DateRule.class,
-            ArrayRule.class,
-            AlphaRule.class,
-            AlphaNumRule.class,
-            AlphaDashRule.class,
-            EmailRule.class,
-            RegexRule.class,
-            UUIDRule.class
-    );
+    private static final List<Class<? extends Annotation>> ruleAnnotationClasses = new ArrayList<>();
 
     static {
-        registerRuleType("string", StringRule.Validator.class);
-        registerRuleType("boolean", BooleanRule.Validator.class);
-        registerRuleType("bool", BooleanRule.Validator.class);
-        registerRuleType("enum", EnumRule.Validator.class);
-        registerRuleType("required", RequiredRule.Validator.class);
-        registerRuleType("req", RequiredRule.Validator.class);
-        registerRuleType("ipv4", IPv4AddressRule.Validator.class);
-        registerRuleType("ipv6", IPv6AddressRule.Validator.class);
-        registerRuleType("int", IntegerRule.Validator.class);
-        registerRuleType("integer", IntegerRule.Validator.class);
-        registerRuleType("numeric", NumericRule.Validator.class);
-        registerRuleType("num", NumericRule.Validator.class);
-        registerRuleType("date", DateRule.Validator.class);
-        registerRuleType("array", ArrayRule.Validator.class);
-        registerRuleType("list", ArrayRule.Validator.class);
-        registerRuleType("alpha", AlphaRule.Validator.class);
-        registerRuleType("alpha_num", AlphaNumRule.Validator.class);
-        registerRuleType("alpha_dash", AlphaDashRule.Validator.class);
-        registerRuleType("email", EmailRule.Validator.class);
-        registerRuleType("regex", RegexRule.Validator.class);
-        registerRuleType("uuid", UUIDRule.Validator.class);
+        registerRuleType("string",     StringRule.Validator.class,      StringRule.class);
+        registerRuleType("boolean",    BooleanRule.Validator.class,     BooleanRule.class);
+        registerRuleType("bool",       BooleanRule.Validator.class,     BooleanRule.class);
+        registerRuleType("enum",       EnumRule.Validator.class,        EnumRule.class);
+        registerRuleType("required",   RequiredRule.Validator.class,    RequiredRule.class);
+        registerRuleType("req",        RequiredRule.Validator.class,    RequiredRule.class);
+        registerRuleType("ipv4",       IPv4AddressRule.Validator.class, IPv4AddressRule.class);
+        registerRuleType("ipv6",       IPv6AddressRule.Validator.class, IPv6AddressRule.class);
+        registerRuleType("int",        IntegerRule.Validator.class,     IntegerRule.class);
+        registerRuleType("integer",    IntegerRule.Validator.class,     IntegerRule.class);
+        registerRuleType("numeric",    NumericRule.Validator.class,     NumericRule.class);
+        registerRuleType("num",        NumericRule.Validator.class,     NumericRule.class);
+        registerRuleType("date",       DateRule.Validator.class,        DateRule.class);
+        registerRuleType("array",      ArrayRule.Validator.class,       ArrayRule.class);
+        registerRuleType("list",       ArrayRule.Validator.class,       ArrayRule.class);
+        registerRuleType("alpha",      AlphaRule.Validator.class,       AlphaRule.class);
+        registerRuleType("alpha_num",  AlphaNumRule.Validator.class,    AlphaNumRule.class);
+        registerRuleType("alpha_dash", AlphaDashRule.Validator.class,   AlphaDashRule.class);
+        registerRuleType("email",      EmailRule.Validator.class,       EmailRule.class);
+        registerRuleType("regex",      RegexRule.Validator.class,       RegexRule.class);
+        registerRuleType("uuid",       UUIDRule.Validator.class,        UUIDRule.class);
     }
 
-    public static void registerRuleType(String name, Class<? extends ValidationRule> type) {
+    public static void registerRuleType(String name, Class<? extends ValidationRule> type, Class<? extends Annotation> annotationClass) {
+        if (!ruleAnnotationClasses.contains(annotationClass))
+            ruleAnnotationClasses.add(annotationClass);
         try {
             Constructor<? extends ValidationRule> constructor = type.getDeclaredConstructor(String[].class);
             constructor.setAccessible(true);
@@ -373,13 +358,14 @@ public class Validator {
                 if (r.size() > 0)
                     addMapRules(f, rules, new String[]{name}, r);
             }
-            for (Class<? extends Annotation> annotation : RULE_ANNOTATIONS) {
+            for (Class<? extends Annotation> annotation : ruleAnnotationClasses) {
                 Annotation a = f.getDeclaredAnnotation(annotation);
                 if (a != null) {
                     List<ValidationRule> r = new ArrayList<>();
                     try {
                         Class<?> validatorClazz = Class.forName(annotation.getName() + "$Validator"); // stupid way of doing this;
-                        Constructor<ValidationRule> constructor = (Constructor<ValidationRule>) validatorClazz.getConstructor(annotation);
+                        Constructor<ValidationRule> constructor = (Constructor<ValidationRule>) validatorClazz.getDeclaredConstructor(annotation);
+                        constructor.setAccessible(true);
                         r.add(constructor.newInstance(a));
                     } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException ignored) {}
                     if (r.size() > 0)
