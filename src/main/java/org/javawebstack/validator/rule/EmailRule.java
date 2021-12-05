@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 public @interface EmailRule {
     class Validator implements ValidationRule {
         public Validator(EmailRule rule) {}
+        public Validator() {}
 
         @Override
         public String validate(ValidationContext context, Field field, AbstractElement value) {

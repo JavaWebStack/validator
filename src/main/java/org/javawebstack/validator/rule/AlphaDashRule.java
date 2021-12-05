@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 public @interface AlphaDashRule {
     class Validator implements ValidationRule {
         public Validator(AlphaDashRule rule) {}
+        public Validator() {}
 
         @Override
         public String validate(ValidationContext context, Field field, AbstractElement value) {

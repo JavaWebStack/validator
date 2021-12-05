@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 public @interface AlphaNumRule {
     class Validator implements ValidationRule {
         public Validator(AlphaNumRule rule) {}
+        public Validator() {}
 
         @Override
         public String validate(ValidationContext context, Field field, AbstractElement value) {

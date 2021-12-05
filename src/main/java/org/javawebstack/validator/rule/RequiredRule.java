@@ -18,6 +18,8 @@ public @interface RequiredRule  {
     class Validator implements ValidationRule {
         public Validator(RequiredRule rule) {} // needed
 
+        public Validator() {}
+
         public String validate(ValidationContext context, Field field, AbstractElement value) {
             return !value.isNull() ? null : "Missing required field";
         }
