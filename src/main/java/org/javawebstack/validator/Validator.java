@@ -20,7 +20,7 @@ public class Validator {
     private static final Map<String, Constructor<? extends ValidationRule>> validationRules = new HashMap<>();
     private static final Map<Class<?>, Validator> validators = new HashMap<>();
 
-    private static final List<Class<? extends Annotation>> ruleAnnotationClasses = new ArrayList<>();
+    private static final Map<Class<? extends ValidationRule>, Class<? extends Annotation>> ruleAnnotationClasses = new HashMap<>();
 
     static {
         registerRuleType("string",     StringRule.Validator.class,      StringRule.class);
@@ -47,8 +47,8 @@ public class Validator {
     }
 
     public static void registerRuleType(String name, Class<? extends ValidationRule> type, Class<? extends Annotation> annotationClass) {
-        if (!ruleAnnotationClasses.contains(annotationClass))
-            ruleAnnotationClasses.add(annotationClass);
+        if (!ruleAnnotationClasses.containsKey(type))
+            ruleAnnotationClasses.put(type, annotationClass);
         try {
             Constructor<? extends ValidationRule> constructor = type.getDeclaredConstructor(String[].class);
             constructor.setAccessible(true);
@@ -358,20 +358,19 @@ public class Validator {
                 if (r.size() > 0)
                     addMapRules(f, rules, new String[]{name}, r);
             }
-            for (Class<? extends Annotation> annotation : ruleAnnotationClasses) {
-                Annotation a = f.getDeclaredAnnotation(annotation);
+            ruleAnnotationClasses.entrySet().stream().distinct().forEach(annotation -> {
+                Annotation a = f.getDeclaredAnnotation(annotation.getValue());
                 if (a != null) {
                     List<ValidationRule> r = new ArrayList<>();
                     try {
-                        Class<?> validatorClazz = Class.forName(annotation.getName() + "$Validator"); // stupid way of doing this;
-                        Constructor<ValidationRule> constructor = (Constructor<ValidationRule>) validatorClazz.getDeclaredConstructor(annotation);
+                        Constructor<ValidationRule> constructor = (Constructor<ValidationRule>) annotation.getKey().getDeclaredConstructor(annotation.getValue());
                         constructor.setAccessible(true);
                         r.add(constructor.newInstance(a));
-                    } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException ignored) {}
+                    } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException ignored) {}
                     if (r.size() > 0)
                         addMapRules(f, rules, new String[]{name}, r);
                 }
-            }
+            });
         }
         return rules;
     }
