@@ -1,10 +1,11 @@
 package org.javawebstack.validator;
 
-import com.google.gson.annotations.SerializedName;
 import org.javawebstack.abstractdata.AbstractArray;
 import org.javawebstack.abstractdata.AbstractElement;
 import org.javawebstack.abstractdata.AbstractMapper;
 import org.javawebstack.abstractdata.AbstractNull;
+import org.javawebstack.abstractdata.mapper.MapperTypeSpec;
+import org.javawebstack.abstractdata.mapper.annotation.MapperOptions;
 import org.javawebstack.validator.rule.*;
 
 import java.lang.annotation.Annotation;
@@ -277,10 +278,13 @@ public class Validator {
     }
 
     private static String getFieldName(Field field) {
-        SerializedName[] serializedNames = field.getAnnotationsByType(SerializedName.class);
-        if (serializedNames.length > 0)
-            return serializedNames[0].value();
-        return toSnakeCase(field.getName());
+        MapperTypeSpec typeSpec = MapperTypeSpec.get(field.getDeclaringClass());
+        if(typeSpec == null)
+            return toSnakeCase(field.getName());
+        MapperTypeSpec.FieldSpec fieldSpec = typeSpec.getFieldSpecs().stream().filter(f -> f.getField().equals(field)).findFirst().orElse(null);
+        if(fieldSpec == null || fieldSpec.getField() == null)
+            return toSnakeCase(field.getName());
+        return fieldSpec.getName();
     }
 
     private static class ValidationConfig {
