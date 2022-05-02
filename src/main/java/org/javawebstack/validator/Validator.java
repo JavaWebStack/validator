@@ -5,7 +5,6 @@ import org.javawebstack.abstractdata.AbstractElement;
 import org.javawebstack.abstractdata.AbstractMapper;
 import org.javawebstack.abstractdata.AbstractNull;
 import org.javawebstack.abstractdata.mapper.MapperTypeSpec;
-import org.javawebstack.abstractdata.mapper.annotation.MapperOptions;
 import org.javawebstack.validator.rule.*;
 
 import java.lang.annotation.Annotation;
