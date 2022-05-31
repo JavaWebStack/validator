@@ -281,7 +281,7 @@ public class Validator {
         if(typeSpec == null)
             return toSnakeCase(field.getName());
         MapperTypeSpec.FieldSpec fieldSpec = typeSpec.getFieldSpecs().stream().filter(f -> f.getField().equals(field)).findFirst().orElse(null);
-        if(fieldSpec == null || fieldSpec.getField() == null)
+        if(fieldSpec == null || fieldSpec.getName() == null)
             return toSnakeCase(field.getName());
         return fieldSpec.getName();
     }
