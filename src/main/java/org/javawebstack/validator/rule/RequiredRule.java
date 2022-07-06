@@ -15,13 +15,28 @@ import java.lang.reflect.Field;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequiredRule  {
-    class Validator implements ValidationRule {
-        public Validator(RequiredRule rule) {} // needed
+    boolean allowEmptyStrings() default false;
 
-        public Validator() {}
+    class Validator implements ValidationRule {
+        private final boolean allowEmptyStrings;
+        public Validator(RequiredRule rule) {
+            this.allowEmptyStrings = rule.allowEmptyStrings();
+        }
+
+        public Validator(boolean allowEmptyStrings) {
+            this.allowEmptyStrings = allowEmptyStrings;
+        }
+
+        public Validator() {
+            this.allowEmptyStrings = false;
+        }
 
         public String validate(ValidationContext context, Field field, AbstractElement value) {
-            return !value.isNull() ? null : "Missing required field";
+            if (value.isNull())
+                return "Missing required field";
+            if (value.getType() == AbstractElement.Type.STRING && !allowEmptyStrings && value.string().length() == 0)
+                return "Missing required field";
+            return null;
         }
     }
 }
