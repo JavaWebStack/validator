@@ -4,6 +4,7 @@ import org.javawebstack.abstractdata.AbstractMapper;
 import org.javawebstack.validator.Rule;
 import org.javawebstack.validator.ValidationContext;
 import org.javawebstack.validator.Validator;
+import org.javawebstack.validator.rule.RequiredRule;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -22,6 +23,17 @@ public class RequiredRuleTest {
     }
 
     @Test
+    public void testEmptyStringOption() {
+        Validator validator = Validator.getValidator(TestObject1.class);
+        TestObject1 test = new TestObject1();
+        test.name = "";
+        assertFalse(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        test.name = "Test";
+        test.password = "";
+        assertTrue(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+    }
+
+    @Test
     public void testInnerRequiredRule() {
         Validator validator = Validator.getValidator(TestObject2.class);
         TestObject2 test = new TestObject2();
@@ -36,10 +48,11 @@ public class RequiredRuleTest {
         assertTrue(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
     }
 
+
     private static class TestObject1 {
         @Rule("required")
         String name;
-        @Rule("req")
+        @RequiredRule(allowEmptyStrings = true)
         String password;
     }
 
