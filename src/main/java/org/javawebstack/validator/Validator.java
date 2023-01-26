@@ -33,6 +33,7 @@ public class Validator {
         registerRuleType("ipv6",       IPv6AddressRule.Validator.class, IPv6AddressRule.class);
         registerRuleType("int",        IntegerRule.Validator.class,     IntegerRule.class);
         registerRuleType("integer",    IntegerRule.Validator.class,     IntegerRule.class);
+        registerRuleType("double",     DoubleRule.Validator.class,      DoubleRule.class);
         registerRuleType("numeric",    NumericRule.Validator.class,     NumericRule.class);
         registerRuleType("num",        NumericRule.Validator.class,     NumericRule.class);
         registerRuleType("date",       DateRule.Validator.class,        DateRule.class);
