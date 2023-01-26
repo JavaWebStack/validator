@@ -47,6 +47,8 @@ public class Validator {
         registerRuleType("uuid",       UUIDRule.Validator.class,        UUIDRule.class);
     }
 
+    private final Map<String[], ValidationConfig> rules = new HashMap<>();
+
     public static void registerRuleType(String name, Class<? extends ValidationRule> type, Class<? extends Annotation> annotationClass) {
         if (!ruleAnnotationClasses.containsKey(type) && annotationClass != null)
             ruleAnnotationClasses.put(type, annotationClass);
@@ -130,8 +132,6 @@ public class Validator {
     public static <T> T map(ValidationContext context, Class<T> type, AbstractElement element) {
         return map(context, type, element, new AbstractMapper());
     }
-
-    private final Map<String[], ValidationConfig> rules = new HashMap<>();
 
     public Validator rule(String[] key, ValidationRule... rules) {
         return rule(key, Arrays.asList(rules));
@@ -322,7 +322,7 @@ public class Validator {
             return rules;
         }
         if (type.equals(Double.class) || type.equals(Float.class)) {
-            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new NumericRule.Validator())));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DoubleRule.Validator(Double.MIN_VALUE, Double.MAX_VALUE))));
             return rules;
         }
         if (type.equals(UUID.class)) {

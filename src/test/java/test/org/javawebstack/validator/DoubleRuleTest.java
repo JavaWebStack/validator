@@ -22,9 +22,9 @@ public class DoubleRuleTest {
     public void testEdgeCases() {
         Validator validator = Validator.getValidator(EdgeTest.class);
         EdgeTest test = new EdgeTest();
-        test.value = "9.9";
+        test.value = 9.9;
         assertFalse(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
-        test.value = "10.1";
+        test.value = 10.1;
         assertTrue(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
     }
 
@@ -35,6 +35,6 @@ public class DoubleRuleTest {
 
     private class EdgeTest {
         @DoubleRule(min = 10)
-        String value;
+        Double value;
     }
 }
