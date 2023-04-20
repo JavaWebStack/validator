@@ -16,7 +16,7 @@ import java.lang.reflect.Field;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IntegerRule {
     int min();
-    int max();
+    int max() default Integer.MAX_VALUE;
     int step() default 1;
 
     class Validator implements ValidationRule {
