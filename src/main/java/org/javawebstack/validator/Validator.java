@@ -46,6 +46,7 @@ public class Validator {
         registerRuleType("regex",      RegexRule.Validator.class,       RegexRule.class);
         registerRuleType("uuid",       UUIDRule.Validator.class,        UUIDRule.class);
         registerRuleType("charset",    CharsetRule.Validator.class,     CharsetRule.class);
+        registerRuleType("word_count", WordCountRule.Validator.class,   WordCountRule.class);
     }
 
     private final Map<String[], ValidationConfig> rules = new HashMap<>();
