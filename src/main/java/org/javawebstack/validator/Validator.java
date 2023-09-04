@@ -2,8 +2,8 @@ package org.javawebstack.validator;
 
 import org.javawebstack.abstractdata.AbstractArray;
 import org.javawebstack.abstractdata.AbstractElement;
-import org.javawebstack.abstractdata.AbstractMapper;
 import org.javawebstack.abstractdata.AbstractNull;
+import org.javawebstack.abstractdata.mapper.Mapper;
 import org.javawebstack.abstractdata.mapper.MapperTypeSpec;
 import org.javawebstack.validator.rule.*;
 
@@ -33,6 +33,7 @@ public class Validator {
         registerRuleType("ipv6",       IPv6AddressRule.Validator.class, IPv6AddressRule.class);
         registerRuleType("int",        IntegerRule.Validator.class,     IntegerRule.class);
         registerRuleType("integer",    IntegerRule.Validator.class,     IntegerRule.class);
+        registerRuleType("double",     DoubleRule.Validator.class,      DoubleRule.class);
         registerRuleType("numeric",    NumericRule.Validator.class,     NumericRule.class);
         registerRuleType("num",        NumericRule.Validator.class,     NumericRule.class);
         registerRuleType("date",       DateRule.Validator.class,        DateRule.class);
@@ -44,7 +45,11 @@ public class Validator {
         registerRuleType("email",      EmailRule.Validator.class,       EmailRule.class);
         registerRuleType("regex",      RegexRule.Validator.class,       RegexRule.class);
         registerRuleType("uuid",       UUIDRule.Validator.class,        UUIDRule.class);
+        registerRuleType("charset",    CharsetRule.Validator.class,     CharsetRule.class);
+        registerRuleType("word_count", WordCountRule.Validator.class,   WordCountRule.class);
     }
+
+    private final Map<String[], ValidationConfig> rules = new HashMap<>();
 
     public static void registerRuleType(String name, Class<? extends ValidationRule> type, Class<? extends Annotation> annotationClass) {
         if (!ruleAnnotationClasses.containsKey(type) && annotationClass != null)
@@ -118,19 +123,17 @@ public class Validator {
         return validator;
     }
 
-    public static <T> T map(ValidationContext context, Class<T> type, AbstractElement element, AbstractMapper mapper) {
+    public static <T> T map(ValidationContext context, Class<T> type, AbstractElement element, Mapper mapper) {
         Validator validator = getValidator(type);
         ValidationResult result = validator.validate(context, element);
         if (!result.isValid())
             throw new ValidationException(result);
-        return mapper.fromAbstract(element, type);
+        return mapper.map(element, type);
     }
 
     public static <T> T map(ValidationContext context, Class<T> type, AbstractElement element) {
-        return map(context, type, element, new AbstractMapper());
+        return map(context, type, element, new Mapper());
     }
-
-    private final Map<String[], ValidationConfig> rules = new HashMap<>();
 
     public Validator rule(String[] key, ValidationRule... rules) {
         return rule(key, Arrays.asList(rules));
@@ -321,7 +324,7 @@ public class Validator {
             return rules;
         }
         if (type.equals(Double.class) || type.equals(Float.class)) {
-            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new NumericRule.Validator())));
+            rules.put(new String[0], new ValidationConfig(field, Collections.singletonList(new DoubleRule.Validator(Double.MIN_VALUE, Double.MAX_VALUE))));
             return rules;
         }
         if (type.equals(UUID.class)) {

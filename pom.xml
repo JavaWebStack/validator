@@ -7,7 +7,7 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <buildVersion>1.0.1-SNAPSHOT</buildVersion>
+        <buildVersion>1.0.2-SNAPSHOT</buildVersion>
     </properties>
 
     <groupId>org.javawebstack</groupId>
@@ -44,15 +44,8 @@
         <dependency>
             <groupId>org.javawebstack</groupId>
             <artifactId>abstract-data</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.6</version>
         </dependency>
-        <!--- Temporary fix for transitive vulnerabilities -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.33</version>
-        </dependency>
-        <!--- ============================================ -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
@@ -61,7 +54,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.8.1</version>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
