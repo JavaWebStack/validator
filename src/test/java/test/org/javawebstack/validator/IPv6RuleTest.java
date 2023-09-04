@@ -1,6 +1,6 @@
 package test.org.javawebstack.validator;
 
-import org.javawebstack.abstractdata.AbstractMapper;
+import org.javawebstack.abstractdata.mapper.Mapper;
 import org.javawebstack.validator.Rule;
 import org.javawebstack.validator.ValidationContext;
 import org.javawebstack.validator.Validator;
@@ -17,11 +17,11 @@ public class IPv6RuleTest {
 
         // FIX IT
         //test.ip = "ThisIsNotAnIP";
-        //assertFalse(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        //assertFalse(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
         test.ip = "::1/128";
-        assertTrue(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        assertTrue(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
         test.ip = "0:0:0:0:0:0:0:0";
-        assertTrue(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        assertTrue(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
     }
 
 

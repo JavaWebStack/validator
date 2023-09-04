@@ -1,6 +1,6 @@
 package test.org.javawebstack.validator;
 
-import org.javawebstack.abstractdata.AbstractMapper;
+import org.javawebstack.abstractdata.mapper.Mapper;
 import org.javawebstack.validator.ValidationContext;
 import org.javawebstack.validator.Validator;
 import org.javawebstack.validator.rule.DoubleRule;
@@ -13,9 +13,9 @@ public class DoubleRuleTest {
         Validator validator = Validator.getValidator(SimpleTest.class);
         SimpleTest test = new SimpleTest();
         test.value = "hello world";
-        assertFalse(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        assertFalse(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
         test.value = "13.37";
-        assertTrue(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        assertTrue(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
     }
 
     @Test
@@ -23,9 +23,9 @@ public class DoubleRuleTest {
         Validator validator = Validator.getValidator(EdgeTest.class);
         EdgeTest test = new EdgeTest();
         test.value = 9.9;
-        assertFalse(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        assertFalse(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
         test.value = 10.1;
-        assertTrue(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        assertTrue(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
     }
 
     private class SimpleTest {

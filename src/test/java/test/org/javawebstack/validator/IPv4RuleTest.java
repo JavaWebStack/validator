@@ -1,6 +1,6 @@
 package test.org.javawebstack.validator;
 
-import org.javawebstack.abstractdata.AbstractMapper;
+import org.javawebstack.abstractdata.mapper.Mapper;
 import org.javawebstack.validator.Rule;
 import org.javawebstack.validator.ValidationContext;
 import org.javawebstack.validator.Validator;
@@ -17,13 +17,13 @@ public class IPv4RuleTest {
         TestObject1 test = new TestObject1();
 
         test.ip = "ThisIsNotAnIP";
-        assertFalse(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        assertFalse(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
         test.ip = "0.0.0.0";
-        assertTrue(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        assertTrue(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
         test.ip = "255.255.255.255";
-        assertTrue(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        assertTrue(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
         test.ip = "256.455.275.295";
-        assertFalse(validator.validate(new ValidationContext(), new AbstractMapper().toAbstract(test)).isValid());
+        assertFalse(validator.validate(new ValidationContext(), new Mapper().map(test)).isValid());
     }
 
 
