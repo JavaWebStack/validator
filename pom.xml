@@ -44,15 +44,8 @@
         <dependency>
             <groupId>org.javawebstack</groupId>
             <artifactId>abstract-data</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.6</version>
         </dependency>
-        <!--- Temporary fix for transitive vulnerabilities -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.33</version>
-        </dependency>
-        <!--- ============================================ -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
